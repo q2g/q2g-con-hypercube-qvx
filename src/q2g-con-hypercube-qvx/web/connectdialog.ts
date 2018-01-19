@@ -11,10 +11,8 @@ import "css!QlikTableConnector.webroot/connectdialog.css";
 class ConnectDialog {
     name: string = "";
     host = "";
-    username = "test1";
-    password = "test";
-    qid = "";
-    appid = "";
+    username = "";
+    password = "";
     isEdit: boolean;
     provider: string = "QlikTableConnector.exe";
     connectionInfo: string;
@@ -33,10 +31,10 @@ class ConnectDialog {
         }
     }
 
-    private connectionString(host: string, appid: string, qid: string): string {
+    private connectionString(host: string): string {
         if (!host)
             host = "localhost";
-        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";" + "appid=" + appid + ";" + "qid=" + qid + ";" + "\"";
+        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";" + "\"";
     }
 
     get titleText(): string {
@@ -59,20 +57,6 @@ class ConnectDialog {
             });
         }
 
-        input.serverside.sendJsonRequest("getAppId").then((info) => {
-            try {
-                this.appid = (info.qMessage as string);
-            } catch (e) {
-            }
-        });
-
-        input.serverside.sendJsonRequest("getqId").then((info) => {
-            try {
-                this.qid = (info.qMessage as string);
-            } catch (e) {
-            }
-        });
-
         input.serverside.sendJsonRequest("getVersion").then((info) => {
             try {
                 this.version = (info.qMessage as string).replace(".Sha.", " Sha.");
@@ -90,7 +74,7 @@ class ConnectDialog {
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,
-                    this.connectionString(this.host, this.appid, this.qid),
+                    this.connectionString(this.host),
                     this.provider,
                     overrideCredentials,
                     this.username,
@@ -107,7 +91,7 @@ class ConnectDialog {
                     if (typeof this.password === "undefined")
                         this.password = "";
 
-                    this.input.serverside.createNewConnection(this.name, this.connectionString(this.host, this.appid, this.qid), this.username, this.password);
+                    this.input.serverside.createNewConnection(this.name, this.connectionString(this.host), this.username, this.password);
                     this.destroyComponent();
                 }
             }

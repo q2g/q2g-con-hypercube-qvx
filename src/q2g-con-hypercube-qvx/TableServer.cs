@@ -20,6 +20,9 @@ namespace QlikTableConnector
     using System.Linq;
     using Qlik.Engine;
     using Qlik.Sense.Client;
+    using System.IO;
+    using System.Reflection;
+    using Newtonsoft.Json;
     #endregion
 
     public class TableServer : QvxServer
@@ -55,11 +58,13 @@ namespace QlikTableConnector
             }
         }
 
+        
+
         private QvDataContractResponse GetDatabases()
         {
-            var databaseList = new List<QlikView.Qvx.QvxLibrary.Database>();
-            var qlikApp = new QlikApp("Qlik Sense Desktop");
+            var qlikApp = AppConfig.GetQlikInstance();
             var apps = qlikApp.GetAllApps();
+            var databaseList = new List<QlikView.Qvx.QvxLibrary.Database>();
             foreach (var app in apps)
                 databaseList.Add(new QlikView.Qvx.QvxLibrary.Database() { qName = app });
 
@@ -72,7 +77,7 @@ namespace QlikTableConnector
         private QvDataContractResponse GetTables(string appId)
         {
             var tables = new List<QvxTable>();
-            var qlikApp = new QlikApp(appId, "Qlik Sense Desktop", null);
+            var qlikApp = AppConfig.GetQlikInstance(appId);
             if (!qlikApp.Connect(true))
                 throw new Exception($"No connection with app {appId}");
 
@@ -115,7 +120,7 @@ namespace QlikTableConnector
             var fields = new List<QvxField>();
             if (!String.IsNullOrEmpty(id))
             {
-                var qlikApp = new QlikApp(appId, "Qlik Sense Desktop", null);
+                var qlikApp = AppConfig.GetQlikInstance(appId);
                 if (!qlikApp.Connect(true))
                     throw new Exception($"No connection with app {appId}");
 
@@ -125,6 +130,8 @@ namespace QlikTableConnector
                     var genericObject = qlikApp.FirstSession.CurrentApp.CreateGenericSessionObjectAsync(masterObject.Properties).Result;
                     var tableLayout = genericObject.GetLayout().As<TableLayout>();
                     var hyperCube = tableLayout.HyperCube.Get<Table>("table");
+                    //hyperCube.DimensionInfo
+                    //which object to cast ???
                 }
 
                 var table = qlikApp.FirstSession.CurrentApp.GetObject<Table>(id);

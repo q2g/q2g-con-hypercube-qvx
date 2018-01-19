@@ -60,7 +60,7 @@ export =
                         for (var i = 0; i < selections.length; i++) {
                             for (var j = 0; j < selections[i].owner.tables.length; j++) {
                                 var table = selections[i].owner.tables[j];
-                                if (table.checked) {
+                                if (table.nbrOfCheckedFields > 0) {
                                     script += "SQL SELECT";
                                     for (var k = 0; k < table.fields.length; k++) {
                                         var field = table.fields[k];

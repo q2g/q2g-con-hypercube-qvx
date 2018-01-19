@@ -30,19 +30,7 @@ namespace QlikTableConnector
         #endregion
 
         #region Init
-        public override void Init()
-        {
-            //try
-            //{
-            //    var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-            //    if (File.Exists(keyFile))
-            //        Manager = new CryptoManager(keyFile);
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Error(ex, "The connection could not be initialized.");
-            //}
-        }
+        public override void Init() { }
         #endregion
 
         #region Methods
@@ -66,7 +54,7 @@ namespace QlikTableConnector
                 var fields = new List<QvxField>();
                 var rows = new List<QvxDataRow>();
 
-                var qlikApp = new QlikApp(script.AppId, "Qlik Sense Desktop", null);
+                var qlikApp = AppConfig.GetQlikInstance(script.AppId);
                 if (!qlikApp.Connect(true))
                     throw new Exception("No connection possible.");
 
@@ -134,9 +122,8 @@ namespace QlikTableConnector
             {
                 //Thread.Sleep(12000);
                 //parameters comes over sql script
-                //this.MParameters.TryGetValue("appid", out string appid);
-                //this.MParameters.TryGetValue("qid", out string qid);
-
+                //this.MParameters.TryGetValue("userId", out string userId);
+                //this.MParameters.TryGetValue("userDirectory", out string userDirectory);
                 var script = ScriptCode.Parse(query);
                 if (script == null)
                     throw new Exception("The sql script is not valid.");    
