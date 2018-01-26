@@ -1,13 +1,13 @@
 ﻿#region License
 /*
-Copyright (c) 2017 Konrad Mattheis und Martin Berthold
+Copyright (c) 2018 Konrad Mattheis und Martin Berthold
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #endregion
 
-namespace QlikTableConnector
+namespace q2gconhypercubeqvx
 {
     #region Usings
     using System;
@@ -20,7 +20,8 @@ namespace QlikTableConnector
     using System.Threading;
     using Qlik.Sense.Client.Visualizations;
     using Qlik.Engine;
-    using QlikTableConnector.QlikApplication;
+    using q2gconhypercubeqvx.QlikApplication;
+    using Qlik.Sense.Client;
     #endregion
 
     public class TableConnection : QvxConnection
@@ -29,23 +30,18 @@ namespace QlikTableConnector
         private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
         #endregion
 
+        #region Variables
+        private TableFunc tableFunctions;
+        #endregion
+
         #region Init
         public override void Init()
         {
-            //try
-            //{
-            //    var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-            //    if (File.Exists(keyFile))
-            //        Manager = new CryptoManager(keyFile);
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Error(ex, "The connection could not be initialized.");
-            //}
+            tableFunctions = new TableFunc();
         }
         #endregion
 
-        #region Methods
+        #region private methods
         private bool IsUsedField(string field, ScriptCode code)
         {
             if (code.Fields.Count == 0)
@@ -54,97 +50,48 @@ namespace QlikTableConnector
             return code.Fields.IndexOf(field) > -1;
         }
 
-        private QvxTable GetData(ScriptCode script)
+        private QvxTable GetData(ScriptCode script, string parmStr)
         {
             try
             {
-                var resultTable = new QvxTable()
+                var parameter = ConnectorParameter.Create(parmStr);
+                var qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
+                if(qlikApp == null)
+                  return  new QvxTable();
+                foreach (var filter in script.Filter)
                 {
-                    TableName = "CopyTable",
-                };
-
-                var fields = new List<QvxField>();
-                var rows = new List<QvxDataRow>();
-
-                var qlikApp = new QlikApp(script.AppId, "Qlik Sense Desktop", null);
-                if (!qlikApp.Connect(true))
-                    throw new Exception("No connection possible.");
-
-                //where
-                //foreach (var filter in script.Filter)
-                //{
-                //    filter.Name = "",
-                //    filter.Value = "",
-                //}
-
-                var table = qlikApp.FirstSession.CurrentApp.GetObject<Table>(script.TableId);
-                var width = table.ColumnWidths.Count();
-
-                foreach (var dimInfo in table.DimensionInfo)
-                {
-                    if (IsUsedField(dimInfo.FallbackTitle, script))
-                    {
-                        fields.Add(new QvxField(dimInfo.FallbackTitle, QvxFieldType.QVX_TEXT,
-                                                QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
-                                                QlikView.Qvx.QvxLibrary.FieldAttrType.ASCII));
-                    }
+                    var results = filter.Values;
+                    if (filter.IsFormula)
+                        results = new List<string>() { (qlikApp.FirstSession.CurrentApp.EvaluateExAsync(filter.Values.First()).Result.Text) };
+                    qlikApp.FirstSession.Selections.SelectValues(filter.Name, results);
                 }
 
-                foreach (var measureInfo in table.MeasureInfo)
-                {
-                    if (IsUsedField(measureInfo.FallbackTitle, script))
-                    {
-                        fields.Add(new QvxField(measureInfo.FallbackTitle, QvxFieldType.QVX_TEXT,
-                                            QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
-                                            QlikView.Qvx.QvxLibrary.FieldAttrType.ASCII));
-                    }
-                }
-
-                var initalPage = new NxPage { Top = 0, Left = 0, Width = width, Height = 1000 };
-                var allPages = table.HyperCubePager.IteratePages(new[] { initalPage }, Pager.Next);
-                var allMatrix = allPages.SelectMany(pages => pages.First().Matrix);
-                foreach (var matrix in allMatrix)
-                {
-                    var row = new QvxDataRow();
-                    foreach (var order in table.ColumnOrder)
-                    {
-                        if (order < fields.Count)
-                        {
-                            var field = fields[order];
-                            row[field] = matrix[order].Text;
-                        }
-                    }
-                    rows.Add(row);
-                }
-
-                resultTable.Fields = fields.ToArray();
-                resultTable.GetRows = () => { return rows; };
-                return resultTable;
+                var resultTable = tableFunctions.GetTableInfosFromApp($"CopyTable_{script.ObjectId}", script, parmStr, qlikApp);
+                return resultTable.QvxTable;
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "The table script can not be executed.");
-                return null;
+                return new QvxTable();
             }
         }
+        #endregion
 
+        #region public methods
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
             try
             {
-                //Thread.Sleep(12000);
-                //parameters comes over sql script
-                //this.MParameters.TryGetValue("appid", out string appid);
-                //this.MParameters.TryGetValue("qid", out string qid);
-
+                AppInstance.LoadMemory();
                 var script = ScriptCode.Parse(query);
                 if (script == null)
-                    throw new Exception("The sql script is not valid.");    
-
-                var qvxTable = GetData(script);
+                    throw new Exception("The sql script is not valid.");
+                MParameters.TryGetValue("host", out string parmStr);
+                var qvxTable = GetData(script, parmStr);
                 var result = new QvxDataTable(qvxTable);
                 result.Select(qvxTable.Fields);
-
+                AppInstance.SaveMemory();
+                AppInstance.Dispose();
                 return result;
             }
             catch (Exception ex)

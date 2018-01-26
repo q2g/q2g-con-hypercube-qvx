@@ -8,8 +8,8 @@
     <ProjectGuid>{21281672-E242-41B3-BC23-F15FF5BBCA24}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>QlikTableConnector</RootNamespace>
-    <AssemblyName>q2g-con-hypercube-qvx</AssemblyName>
+    <RootNamespace>q2gconhypercubeqvx</RootNamespace>
+    <AssemblyName>q2gconhypercubeqvx</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -112,6 +112,7 @@
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
@@ -131,6 +132,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="qlikapp\AppInstance.cs" />
     <Compile Include="qlikapp\Credentials.cs" />
     <Compile Include="qlikapp\QlikApp.cs" />
     <Compile Include="qlikapp\QlikAuth.cs" />
@@ -138,6 +140,7 @@
     <Compile Include="qlikapp\QlikDimensions.cs" />
     <Compile Include="qlikapp\QlikListbox.cs" />
     <Compile Include="qlikapp\QlikSelections.cs" />
+    <Compile Include="TableFunc.cs" />
     <Compile Include="TableServer.cs" />
     <Compile Include="TableConnection.cs" />
     <Compile Include="ScriptCode.cs" />
@@ -245,7 +248,7 @@
   </Target>
   <Target Name="AfterBuild">
     <Message Importance="High" Text="InformationalVersion: 1.0.0" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Table Connector&quot;" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;q2g-con-hypercube-qvx&quot;" />
     <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv 1.0.0" />
     <!--
     
@@ -255,14 +258,14 @@
   </Target>
   <Target Name="DebugCopy">
     <PropertyGroup>
-      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\QlikTableConnector</QlikServerPath>
-      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\QlikTableConnector</QlikDesktopPath>
+      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconhypercubeqvx</QlikServerPath>
+      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconhypercubeqvx</QlikDesktopPath>
     </PropertyGroup>
     <ItemGroup>
       <OutputFiles Include="$(OutputPath)\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
   </Target>
   <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>
