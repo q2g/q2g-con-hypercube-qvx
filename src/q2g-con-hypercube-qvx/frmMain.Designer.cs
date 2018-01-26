@@ -7,7 +7,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-namespace QlikTableConnector
+namespace q2gconhypercubeqvx
 {
     partial class frmMain
     {

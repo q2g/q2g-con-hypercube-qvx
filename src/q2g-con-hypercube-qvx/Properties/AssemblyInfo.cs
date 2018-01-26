@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("akquinet")]
 [assembly: AssemblyProduct("q2g-con-hypercube-qvx")]
-[assembly: AssemblyCopyright("Copyright © akquinet 2017")]
+[assembly: AssemblyCopyright("Copyright © akquinet 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

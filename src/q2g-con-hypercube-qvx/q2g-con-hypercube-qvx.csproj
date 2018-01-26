@@ -8,7 +8,7 @@
     <ProjectGuid>{21281672-E242-41B3-BC23-F15FF5BBCA24}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>QlikTableConnector</RootNamespace>
+    <RootNamespace>q2gconhypercubeqvx</RootNamespace>
     <AssemblyName>q2g-con-hypercube-qvx</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
