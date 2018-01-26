@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>q2gconhypercubeqvx</RootNamespace>
-    <AssemblyName>q2g-con-hypercube-qvx</AssemblyName>
+    <AssemblyName>q2gconhypercubeqvx</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
