@@ -5,18 +5,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import * as template from "text!QlikTableConnector.webroot/connectdialog.ng.html";
-import "css!QlikTableConnector.webroot/connectdialog.css";
+import * as template from "text!q2gconhypercubeqvx.webroot/connectdialog.ng.html";
+import "css!q2gconhypercubeqvx.webroot/connectdialog.css";
 
 class ConnectDialog {
     name: string = "";
     host = "";
-    username = "test1";
-    password = "test";
-    qid = "";
-    appid = "";
+    username = "";
+    password = "";
+    isDesktop = false;
     isEdit: boolean;
-    provider: string = "q2g-con-hypercube-qvx.exe";
+    provider: string = "q2gconhypercubeqvx.exe";
     connectionInfo: string;
     version: string = "";
 
@@ -33,10 +32,19 @@ class ConnectDialog {
         }
     }
 
-    private connectionString(host: string, appid: string, qid: string): string {
+    private connectionString(host: string): string {
         if (!host)
             host = "localhost";
-        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";" + "appid=" + appid + ";" + "qid=" + qid + ";" + "\"";
+        //let test = `CUSTOM CONNECT TO "provider=${this.provider}; host=${host}|url=test;"`;
+        let test = `CUSTOM CONNECT TO "provider=${this.provider}; ${this.buildHost(this.isDesktop, host, this.username, this.password)};"`;
+        //let test = "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";" + "\"";
+        console.log("connection stzring", test)
+        //return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";"  + "\"";
+        return test;
+    }
+
+    private buildHost(isDesktop: boolean, url: string, username: string, password: string) {
+        return `host=${url}|isDesktop=${isDesktop}|username=${username}|password=${password}`;
     }
 
     get titleText(): string {
@@ -59,20 +67,6 @@ class ConnectDialog {
             });
         }
 
-        //input.serverside.sendJsonRequest("getAppId").then((info) => {
-        //    try {
-        //        this.appid = (info.qMessage as string);
-        //    } catch (e) {
-        //    }
-        //});
-
-        //input.serverside.sendJsonRequest("getqId").then((info) => {
-        //    try {
-        //        this.qid = (info.qMessage as string);
-        //    } catch (e) {
-        //    }
-        //});
-
         input.serverside.sendJsonRequest("getVersion").then((info) => {
             try {
                 this.version = (info.qMessage as string).replace(".Sha.", " Sha.");
@@ -90,7 +84,7 @@ class ConnectDialog {
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,
-                    this.connectionString(this.host, this.appid, this.qid),
+                    this.connectionString(this.host),
                     this.provider,
                     overrideCredentials,
                     this.username,
@@ -107,7 +101,7 @@ class ConnectDialog {
                     if (typeof this.password === "undefined")
                         this.password = "";
 
-                    this.input.serverside.createNewConnection(this.name, this.connectionString(this.host, this.appid, this.qid), this.username, this.password);
+                    this.input.serverside.createNewConnection(this.name, this.connectionString(this.host), this.username, this.password);
                     this.destroyComponent();
                 }
             }

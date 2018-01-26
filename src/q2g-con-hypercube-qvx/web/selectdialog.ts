@@ -60,21 +60,20 @@ export =
                         for (var i = 0; i < selections.length; i++) {
                             for (var j = 0; j < selections[i].owner.tables.length; j++) {
                                 var table = selections[i].owner.tables[j];
-                                if (table.checked) {
-                                    script += "SQL SELECT";
+                                if (table.nbrOfCheckedFields > 0) {
+                                    script += "SQL SELECT ";
                                     for (var k = 0; k < table.fields.length; k++) {
                                         var field = table.fields[k];
                                         if (field.checked)
-                                            script += " \"" + field.name + "\",";
+                                            script += "\"" + field.name + "\"\n,";
                                     }
-
-                                    script = script.replace(/,\s*$/, "");
+                                    script = script.replace(/\n,\s*$/, "");
                                     var myRegexp = /\[(.*)\]$/g;
                                     var match = myRegexp.exec(table.name);
                                     if (match != null && match.length > 0)
                                         var tableId = match[1];
 
-                                    script += " FROM [" + selections[i].database.name + "].[" + tableId + "];\n";
+                                    script += "\nFROM [" + selections[i].database.name + "].[" + tableId + "];\n";
                                 }
                             }
                         }

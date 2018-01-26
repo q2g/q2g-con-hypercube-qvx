@@ -14,10 +14,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             <div class="lui-dialog__body">
                 <label class="lui-label">Connection Name</label>
                 <input class="lui-input" type="text" ng-model="vm.name" placeholder="Connection name" />
-                <label class="lui-label">AppId</label>
-                <input class="lui-input" type="text" ng-model="vm.appid" placeholder="Appid" />
-                <label class="lui-label">qId</label>
-                <input class="lui-input" type="text" ng-model="vm.qid" placeholder="qid" />
+                <label class="lui-label">use Desktop</label>
+                <label class="lui-checkbox">
+                    <input class="lui-checkbox__input" type="checkbox" aria-label="Label" checked ng-model="vm.isDesktop" />
+                    <div class="lui-checkbox__check-wrap">
+                        <span class="lui-checkbox__check"></span>
+                    </div>
+                </label>
+                <label class="lui-label">Host</label>
+                <input class="lui-input" type="text" ng-model="vm.host" placeholder="host" ng-disabled="vm.isDesktop" />
+                <label class="lui-label">User</label>
+                <input class="lui-input" type="text" ng-model="vm.username" placeholder="username" ng-disabled="vm.isDesktop" />
+                <label class="lui-label">Password</label>
+                <input class="lui-input" type="password" ng-model="vm.password" placeholder="password" ng-disabled="vm.isDesktop" />
                 <div class="lui-label connectionInfo" ng-class="{'success': connectionSuccessful}">{{vm.connectionInfo}}</div>
                 <label class="lui-label"></label>
                 <label class="lui-label">Version: {{vm.version}}</label>
