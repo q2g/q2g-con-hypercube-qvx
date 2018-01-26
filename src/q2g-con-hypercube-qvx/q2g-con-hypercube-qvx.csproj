@@ -257,8 +257,8 @@
   </Target>
   <Target Name="DebugCopy">
     <PropertyGroup>
-      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\QlikTableConnector</QlikServerPath>
-      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\QlikTableConnector</QlikDesktopPath>
+      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconhypercubeqvx</QlikServerPath>
+      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconhypercubeqvx</QlikDesktopPath>
     </PropertyGroup>
     <ItemGroup>
       <OutputFiles Include="$(OutputPath)\**\*.*" />
