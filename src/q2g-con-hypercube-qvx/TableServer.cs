@@ -182,7 +182,7 @@ namespace q2gconhypercubeqvx
                 switch (method)
                 {
                     case "getVersion":
-                        response = new Info { qMessage = "1.0.0" };
+                        response = new Info { qMessage = GitVersionInformation.InformationalVersion };
                         break;
                     case "getDatabases":
                         response = GetDatabases(parmStr);

@@ -47,9 +47,8 @@ namespace q2gconhypercubeqvx.QlikApplication
 
         #region Constructor & Init
         public QlikApp(string connectUri) : this(null, connectUri, null) { }
-
         public QlikApp(string appName, string connectUri, IQlikCredentials credentials)
-        {           
+        {
             if (String.IsNullOrEmpty(connectUri) || connectUri == "Qlik Sense Desktop")
             {
                 //Qlik Sense Desktop
@@ -65,11 +64,9 @@ namespace q2gconhypercubeqvx.QlikApplication
                     AppName = appName;
                 else
                     AppId = resultValue.Value;
-
                 AppUri = new Uri(connectUri);
                 IsServerConnection = true;
             }
-
             Credentials = credentials;
             Sessions = new List<QlikAppSession>();
         }

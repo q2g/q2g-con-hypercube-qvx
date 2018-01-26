@@ -32,7 +32,7 @@ namespace q2gconhypercubeqvx
         #region Static Methods
         public static ConnectorLogger CreateLogger()
         {
-            var connectorPath = Assembly.GetExecutingAssembly().Location;
+            var connectorPath = Assembly.GetExecutingAssembly().Location.ToLowerInvariant();
             if(connectorPath.EndsWith("\\q2gconhypercubeqvx\\q2gconhypercubeqvx.exe"))
             {
                 connectorPath = Path.Combine(Path.GetDirectoryName(connectorPath), "Log");
