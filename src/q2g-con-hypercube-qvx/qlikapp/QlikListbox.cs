@@ -1,4 +1,13 @@
-﻿namespace QlikTableConnector.QlikApplication
+﻿#region License
+/*
+Copyright (c) 2017 Konrad Mattheis und Martin Berthold
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+#endregion
+
+namespace q2gconhypercubeqvx.QlikApplication
 {
     #region Usings
     using Qlik.Engine;
@@ -8,7 +17,6 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using QlikTableConnector;
     #endregion
 
     public class QlikListbox
@@ -43,29 +51,11 @@
             FilterText = filtertext;
             Selection = CreateSession();
             Selection.GetLayout();
-            //Selection.Changed += Selection_Changed;
             CurrentIndex = -1;
             Id = Guid.NewGuid();
         }
 
-        //private void Selection_Changed(object sender, EventArgs e)
-        //{
-        //    Listbox listbox = null;
-        //    ListboxLayout listObj = null;
-        //    var count = 0;
-
-        //    try
-        //    {
-        //        listbox = sender as Listbox;
-        //        listObj = listbox.GetLayout() as ListboxLayout;
-        //        count = listObj?.ListObject?.DimensionInfo?.Cardinal ?? 0;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.Error(ex);
-        //    }
-        //}
-
+        #region private methods
         private Listbox CreateSession()
         {
             var session = SenseApp.CreateGenericSessionObject(
@@ -111,14 +101,12 @@
         {
             if (values == null)
             {
-                logger.Debug("Selection: The filter values are null.");
                 return null;
             }
 
             var count = cells.Where(c => values.Contains(c.Text)).Count();
             if (count == 0)
             {
-                logger.Debug("Selection: The filter values not exists.");
                 return null;
             }
 
@@ -148,7 +136,9 @@
 
             return null;
         }
+        #endregion
 
+        #region public methods
         public void ClearSelections()
         {
             Selection.ClearSelections();
@@ -223,8 +213,10 @@
                 throw new Exception("The next selection could not be set.", ex);
             }
         }
+        #endregion
     }
 
+    #region helper classes
     public class SelectionGroup
     {
         public SelectionGroup()
@@ -266,4 +258,5 @@
             return $"{Value}={ElementNumber}";
         }
     }
+    #endregion
 }

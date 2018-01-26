@@ -7,7 +7,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-namespace QlikTableConnector.QlikApplication
+namespace q2gconhypercubeqvx.QlikApplication
 {
     #region Usings
     using Newtonsoft.Json;
