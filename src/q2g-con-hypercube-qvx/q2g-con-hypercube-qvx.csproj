@@ -248,7 +248,7 @@
   </Target>
   <Target Name="AfterBuild">
     <Message Importance="High" Text="InformationalVersion: 1.0.0" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Table Connector&quot;" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;q2g-con-hypercube-qvx&quot;" />
     <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv 1.0.0" />
     <!--
     
