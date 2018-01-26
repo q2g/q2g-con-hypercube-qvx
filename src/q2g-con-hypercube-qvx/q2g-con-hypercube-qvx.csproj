@@ -131,6 +131,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="qlikapp\AppInstance.cs" />
     <Compile Include="qlikapp\Credentials.cs" />
     <Compile Include="qlikapp\QlikApp.cs" />
     <Compile Include="qlikapp\QlikAuth.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="qlikapp\QlikDimensions.cs" />
     <Compile Include="qlikapp\QlikListbox.cs" />
     <Compile Include="qlikapp\QlikSelections.cs" />
+    <Compile Include="TableFunc.cs" />
     <Compile Include="TableServer.cs" />
     <Compile Include="TableConnection.cs" />
     <Compile Include="ScriptCode.cs" />
@@ -261,8 +263,8 @@
     <ItemGroup>
       <OutputFiles Include="$(OutputPath)\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
   </Target>
   <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>

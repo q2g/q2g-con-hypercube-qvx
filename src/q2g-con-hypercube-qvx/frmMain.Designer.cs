@@ -63,9 +63,7 @@ namespace QlikTableConnector
             this.lblText.Name = "lblText";
             this.lblText.Size = new System.Drawing.Size(312, 38);
             this.lblText.TabIndex = 2;
-            this.lblText.Text = "Please, use the connector with Qlik.\r\nStart Qlik and go to the script load sectio" +
-    "n.\r\n";
-            this.lblText.Click += new System.EventHandler(this.lblText_Click);
+            this.lblText.Text = "Please, use the connector with Qlik.\r\nStart Qlik and go to the script load section.\r\n";
             // 
             // lblPowered
             // 
@@ -96,7 +94,6 @@ namespace QlikTableConnector
             this.PerformLayout();
 
         }
-
         #endregion
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Timer timer;
