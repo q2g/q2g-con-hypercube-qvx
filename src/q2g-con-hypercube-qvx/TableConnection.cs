@@ -50,11 +50,10 @@ namespace q2gconhypercubeqvx
             return code.Fields.IndexOf(field) > -1;
         }
 
-        private QvxTable GetData(ScriptCode script, string parmStr)
+        private QvxTable GetData(ScriptCode script, ConnectorParameter parameter)
         {
             try
-            {
-                var parameter = ConnectorParameter.Create(parmStr);
+            {                
                 var qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
                 if(qlikApp == null)
                   return  new QvxTable();
@@ -66,7 +65,7 @@ namespace q2gconhypercubeqvx
                     qlikApp.FirstSession.Selections.SelectValues(filter.Name, results);
                 }
 
-                var resultTable = tableFunctions.GetTableInfosFromApp($"CopyTable_{script.ObjectId}", script, parmStr, qlikApp);
+                var resultTable = tableFunctions.GetTableInfosFromApp($"CopyTable_{script.ObjectId}", script, parameter, qlikApp);
                 return resultTable.QvxTable;
             }
             catch (Exception ex)
@@ -86,8 +85,10 @@ namespace q2gconhypercubeqvx
                 var script = ScriptCode.Parse(query);
                 if (script == null)
                     throw new Exception("The sql script is not valid.");
-                MParameters.TryGetValue("host", out string parmStr);
-                var qvxTable = GetData(script, parmStr);
+             
+                var parameter = ConnectorParameter.Create(MParameters);
+
+                var qvxTable = GetData(script, parameter);
                 var result = new QvxDataTable(qvxTable);
                 result.Select(qvxTable.Fields);
                 AppInstance.SaveMemory();

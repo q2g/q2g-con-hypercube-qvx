@@ -12,6 +12,8 @@ class ConnectDialog {
     name: string = "";
     host = "";
     username = "";
+    olduser: string;
+    passlength: number;
     password = "";
     isDesktop = false;
     isEdit: boolean;
@@ -33,22 +35,15 @@ class ConnectDialog {
     }
 
     private connectionString(host: string): string {
-        if (!host)
+        if (!host || this.isDesktop)
             host = "localhost";
-        //let test = `CUSTOM CONNECT TO "provider=${this.provider}; host=${host}|url=test;"`;
-        let test = `CUSTOM CONNECT TO "provider=${this.provider}; ${this.buildHost(this.isDesktop, host, this.username, this.password)};"`;
-        //let test = "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";" + "\"";
-        console.log("connection stzring", test)
-        //return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";"  + "\"";
-        return test;
-    }
 
-    private buildHost(isDesktop: boolean, url: string, username: string, password: string) {
-        return `host=${url}|isDesktop=${isDesktop}|username=${username}|password=${password}`;
+        let conString = `CUSTOM CONNECT TO "provider=${this.provider};host=${host};isDesktop=${this.isDesktop};"`;
+        return conString;
     }
 
     get titleText(): string {
-        return this.isEdit ? "Change table connection" : "Add table connection";
+        return this.isEdit ? "Change Sense App connection" : "Add Sense App connection";
     }
 
     get saveButtonText(): string {
@@ -63,9 +58,25 @@ class ConnectDialog {
             input.serverside.getConnection(input.instanceId).then((result)=> {
                 this.name = result.qConnection.qName;
                 let connStr: string = result.qConnection.qConnectionString;
-                this.host = "";
+                let list = connStr.match("host=([^;]*);");
+                if (list.length == 2)
+                    this.host = list[1];
+                else
+                    this.host = "";
+
+                list = connStr.match("isDesktop=([^;]*);");
+                this.isDesktop = list.length == 2 && list[1] == "true";                                
             });
         }
+
+        input.serverside.sendJsonRequest("getUsername").then((info) => {
+            try {
+                this.username = (info.qMessage as string);
+                this.olduser = this.username;
+                this.password = "**********";
+            } catch (e) {
+            }
+        });
 
         input.serverside.sendJsonRequest("getVersion").then((info) => {
             try {
@@ -80,7 +91,7 @@ class ConnectDialog {
             this.connectionInfo = "Please enter a name for the connection.";
         } else {
             if (this.isEdit) {
-                var overrideCredentials = false;
+                var overrideCredentials = this.username !== this.olduser || this.password !== "**********";                
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,

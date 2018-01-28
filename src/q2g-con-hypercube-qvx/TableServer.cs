@@ -46,12 +46,11 @@ namespace q2gconhypercubeqvx
             return null;
         }
 
-        private QvDataContractResponse GetDatabases(string paramStr)
+        private QvDataContractResponse GetDatabases(ConnectorParameter parameter)
         {
             var databaseList = new List<QlikView.Qvx.QvxLibrary.Database>();
             try
-            {
-                var parameter = ConnectorParameter.Create(paramStr);
+            {               
                 var qlikApp = AppInstance.GetQlikInstance(parameter);
                 if (qlikApp == null)
                     return new QvDataContractDatabaseListResponse { qDatabases = databaseList.ToArray() };
@@ -67,13 +66,12 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetTables(string paramStr, string appId)
+        private QvDataContractResponse GetTables(ConnectorParameter parameter, string appId)
         {
             var tables = new List<QvxTable>();
 
             try
-            {
-                var parameter = ConnectorParameter.Create(paramStr);
+            {                
                 var qlikApp = AppInstance.GetQlikInstance(parameter, appId);
                 if (qlikApp == null)
                     return new QvDataContractTableListResponse { qTables = tables };
@@ -103,7 +101,7 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetFields(string parmStr, string appId, string objectId)
+        private QvDataContractResponse GetFields(ConnectorParameter parameter, string appId, string objectId)
         {
             try
             {
@@ -111,7 +109,7 @@ namespace q2gconhypercubeqvx
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for field table found.");
                 var script = ScriptCode.Create(appId, oId);
-                var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, parmStr);
+                var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, parameter);
                 if (resultTable == null)
                     throw new Exception("no field table found.");
                 return new QvDataContractFieldListResponse { qFields = resultTable.QvxTable.Fields };
@@ -123,7 +121,7 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetPreview(string parmStr, string appId, string objectId)
+        private QvDataContractResponse GetPreview(ConnectorParameter parameter, string appId, string objectId)
         {
             try
             {
@@ -131,7 +129,7 @@ namespace q2gconhypercubeqvx
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for preview table found.");
                 var script = ScriptCode.Create(appId, oId);
-                var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, parmStr);
+                var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, parameter);
                 if (resultTable == null)
                     throw new Exception("no preview table found.");
                 return resultTable.Preview;
@@ -178,23 +176,27 @@ namespace q2gconhypercubeqvx
             {
                 QvDataContractResponse response;
                 AppInstance.LoadMemory();
-                connection.MParameters.TryGetValue("host", out string parmStr);
+                
+                var parameter = ConnectorParameter.Create(connection.MParameters);
                 switch (method)
                 {
                     case "getVersion":
                         response = new Info { qMessage = GitVersionInformation.InformationalVersion };
                         break;
+                    case "getUsername":
+                        response = new Info { qMessage = parameter.UserName };
+                        break;
                     case "getDatabases":
-                        response = GetDatabases(parmStr);
+                        response = GetDatabases(parameter);
                         break;
                     case "getTables":
-                        response = GetTables(parmStr, userParameters[0]);
+                        response = GetTables(parameter, userParameters[0]);
                         break;
                     case "getFields":
-                        response = GetFields(parmStr, userParameters[0], userParameters[1]);
+                        response = GetFields(parameter, userParameters[0], userParameters[1]);
                         break;
                     case "getPreview":
-                        response = GetPreview(parmStr, userParameters[0], userParameters[1]);
+                        response = GetPreview(parameter, userParameters[0], userParameters[1]);
                         break;
                     default:
                         response = new Info { qMessage = "Unknown command" };
@@ -206,7 +208,7 @@ namespace q2gconhypercubeqvx
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "The json could not be read.");
+                logger.Error(ex, "ERROR" + ex.StackTrace.ToString());
                 return ToJson(new Info { qMessage = "Error" });
             }
         }

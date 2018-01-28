@@ -172,7 +172,7 @@ namespace q2gconhypercubeqvx.QlikApplication
 
         public static void Dispose()
         {
-            activeApp.Dispose();
+            activeApp?.Dispose();
         }
         #endregion
     }
@@ -195,19 +195,13 @@ namespace q2gconhypercubeqvx.QlikApplication
             Password = password;
         }
 
-        public static ConnectorParameter Create(string parameter)
+        public static ConnectorParameter Create(Dictionary<string, string> MParameters)
         {
-            var splitArray = parameter.Split('|');
-            var useDesktop = SplitValue<bool>(splitArray[1]);
-            var userName = SplitValue<string>(splitArray[2]);
-            var password = SplitValue<string>(splitArray[3]);
-            return new ConnectorParameter(useDesktop, splitArray[0], userName, password);
-        }
-
-        private static T SplitValue<T>(string value)
-        {
-            var splitArray = value.Split('=');
-            return (T)Convert.ChangeType(splitArray[1], typeof(T));
+            MParameters.TryGetValue("host", out string host);
+            MParameters.TryGetValue("isDesktop", out string isDesktop);
+            MParameters.TryGetValue("UserId", out string user);
+            MParameters.TryGetValue("Password", out string password);
+            return new ConnectorParameter(isDesktop.ToLowerInvariant() == "true",host, user, password);
         }
             
         public bool UseDesktop { get; set; }

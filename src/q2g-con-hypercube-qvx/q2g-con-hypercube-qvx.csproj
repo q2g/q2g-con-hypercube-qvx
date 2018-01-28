@@ -239,7 +239,7 @@
 
   -->
   <Target Name="ZipPacked">
-    <Message Importance="High" Text="Version: 1.0.0" />
+    <Message Importance="High" Text="Version:$(GitVersion_InformationalVersion)" />
     <Message Importance="High" Text="OutputPath: $(OutputPath)" />
     <CreateItem Include="$(OutputPath)\**\*.*">
       <Output ItemName="ZipFiles" TaskParameter="Include" />
@@ -247,11 +247,10 @@
     <Zip ZipFileName="bin\$(AssemblyName).zip" WorkingDirectory="$(OutputPath)\" Files="@(ZipFiles)" />
   </Target>
   <Target Name="AfterBuild">
-    <Message Importance="High" Text="InformationalVersion: 1.0.0" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;q2g-con-hypercube-qvx&quot;" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv 1.0.0" />
+    <Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G Sense App&quot;" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
     <!--
-    
     -->
     <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
     <CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />

@@ -49,7 +49,7 @@ export =
             };
 
             standardSelectDialogService.showStandardDialog(dialogContentProvider, {
-                precedingLoadVisible: true,
+                precedingLoadVisible: false,
                 fieldsAreSelectable: true,
                 allowFieldRename: false,               
                 scriptGenerator: {
@@ -67,7 +67,7 @@ export =
                                         if (field.checked)
                                             script += "\"" + field.name + "\"\n,";
                                     }
-                                    script = script.replace(/\n,\s*$/, "");
+                                    script = script.replace(/\n,\s*$/,     "");
                                     var myRegexp = /\[(.*)\]$/g;
                                     var match = myRegexp.exec(table.name);
                                     if (match != null && match.length > 0)

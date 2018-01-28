@@ -74,7 +74,7 @@ namespace q2gconhypercubeqvx
         #endregion
 
         #region public methods
-        public TableHelper GetTableInfosFromApp(string tableName, ScriptCode script, string parmStr, QlikApp qlikApp = null)
+        public TableHelper GetTableInfosFromApp(string tableName, ScriptCode script, ConnectorParameter parameter, QlikApp qlikApp = null)
         {
             try
             {
@@ -90,8 +90,7 @@ namespace q2gconhypercubeqvx
                 var rows = new List<QvxDataRow>();
 
                 if (qlikApp == null)
-                {
-                    var parameter = ConnectorParameter.Create(parmStr);
+                {                    
                     qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
                 }
 
