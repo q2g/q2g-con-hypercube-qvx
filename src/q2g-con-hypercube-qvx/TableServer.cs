@@ -176,9 +176,9 @@ namespace q2gconhypercubeqvx
             try
             {
                 QvDataContractResponse response;
-                AppInstance.LoadMemory();
-                logger.Warn(method + "*****");   
-                var parameter = ConnectorParameter.Create(connection.MParameters);
+                AppInstance.LoadMemory();                 
+                var parameter = ConnectorParameter.Create(connection?.MParameters);
+                logger.Trace($"HandleJsonRequest {method}");
                 switch (method)
                 {
                     case "getVersion":
@@ -209,8 +209,8 @@ namespace q2gconhypercubeqvx
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "ERROR " + ex.StackTrace.ToString());
-                return ToJson(new Info { qMessage = "Error" });
+                logger.Error(ex);
+                return ToJson(new Info { qMessage = "Error "+ ex.ToString() });
             }
         }
         #endregion
