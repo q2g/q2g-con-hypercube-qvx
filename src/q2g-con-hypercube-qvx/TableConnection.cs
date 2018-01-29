@@ -66,7 +66,7 @@ namespace q2gconhypercubeqvx
                     qlikApp.FirstSession.Selections.SelectValues(filter.Name, results);
                 }
 
-                var resultTable = tableFunctions.GetTableInfosFromApp($"CopyTable_{script.ObjectId}", script, parameter, qlikApp);
+                var resultTable = tableFunctions.GetTableInfosFromApp($"Table_{script.AppId}_{script.ObjectId}", script, parameter, qlikApp);
                 return resultTable.QvxTable;
             }
             catch (Exception ex)
