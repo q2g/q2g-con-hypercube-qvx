@@ -18,12 +18,13 @@ namespace q2gconhypercubeqvx.QlikApplication
     using System.Security.Cryptography.X509Certificates;
     using System.IO;
     using System.Collections.Generic;
+    using NLog;
     #endregion
 
     public class QlikApp : QlikAuth, IDisposable
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Properties & Variables

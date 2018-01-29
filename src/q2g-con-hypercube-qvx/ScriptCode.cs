@@ -14,12 +14,13 @@ namespace q2gconhypercubeqvx
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
+    using NLog;
     #endregion
 
     public class ScriptCode
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Variables & Properties

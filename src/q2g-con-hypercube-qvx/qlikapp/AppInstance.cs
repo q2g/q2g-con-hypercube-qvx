@@ -11,6 +11,7 @@ namespace q2gconhypercubeqvx.QlikApplication
 {
     #region Usings
     using Newtonsoft.Json;
+    using NLog;
     using System;
     using System.Collections.Generic;
     using System.DirectoryServices.AccountManagement;
@@ -23,7 +24,7 @@ namespace q2gconhypercubeqvx.QlikApplication
     public class AppInstance
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Varibales

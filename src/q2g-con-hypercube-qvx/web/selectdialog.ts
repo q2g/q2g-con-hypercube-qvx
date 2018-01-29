@@ -65,15 +65,15 @@ export =
                                     for (var k = 0; k < table.fields.length; k++) {
                                         var field = table.fields[k];
                                         if (field.checked)
-                                            script += "\"" + field.name + "\"\n,";
+                                            script += "\"" + field.name + "\"\n    ,";
                                     }
-                                    script = script.replace(/\n,\s*$/,     "");
+                                    script = script.replace(/\n    ,\s*$/,"");
                                     var myRegexp = /\[(.*)\]$/g;
                                     var match = myRegexp.exec(table.name);
                                     if (match != null && match.length > 0)
                                         var tableId = match[1];
 
-                                    script += "\nFROM [" + selections[i].database.name + "].[" + tableId + "];\n";
+                                    script += "\nFROM [" + selections[i].database.name + "].[" + tableId + "];\n\n";
                                 }
                             }
                         }
@@ -81,8 +81,7 @@ export =
                         return script;
                     },
 
-                    maybeQuote(a, d, e) {
-                        console.log(this, a, d, e);
+                    maybeQuote(a, d, e) {                        
                         return false;
                     }
                 }

@@ -11,6 +11,7 @@ namespace q2gconhypercubeqvx.QlikApplication
 {
     #region Usings
     using Newtonsoft.Json;
+    using NLog;
     using System;
     using System.IO;
     #endregion
@@ -34,7 +35,7 @@ namespace q2gconhypercubeqvx.QlikApplication
     public class CertificateAuth : IQlikCredentials
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Properties & Variables
@@ -87,7 +88,7 @@ namespace q2gconhypercubeqvx.QlikApplication
     public class WindowsAuth : IQlikCredentials
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Properties & Variables

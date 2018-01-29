@@ -22,12 +22,13 @@ namespace q2gconhypercubeqvx
     using Qlik.Engine;
     using q2gconhypercubeqvx.QlikApplication;
     using Qlik.Sense.Client;
+    using NLog;
     #endregion
 
     public class TableConnection : QvxConnection
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Variables

@@ -23,12 +23,13 @@ namespace q2gconhypercubeqvx
     using System.IO;
     using System.Reflection;
     using Newtonsoft.Json;
+    using NLog;
     #endregion
 
     public class TableServer : QvxServer
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Variables
@@ -176,7 +177,7 @@ namespace q2gconhypercubeqvx
             {
                 QvDataContractResponse response;
                 AppInstance.LoadMemory();
-                
+                logger.Warn(method + "*****");   
                 var parameter = ConnectorParameter.Create(connection.MParameters);
                 switch (method)
                 {
@@ -208,7 +209,7 @@ namespace q2gconhypercubeqvx
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "ERROR" + ex.StackTrace.ToString());
+                logger.Error(ex, "ERROR " + ex.StackTrace.ToString());
                 return ToJson(new Info { qMessage = "Error" });
             }
         }

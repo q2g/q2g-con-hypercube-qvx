@@ -18,12 +18,13 @@ namespace q2gconhypercubeqvx
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using NLog;
     #endregion
 
     public class TableFunc
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region private methods

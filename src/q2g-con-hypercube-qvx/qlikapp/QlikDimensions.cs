@@ -9,6 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconhypercubeqvx.QlikApplication
 {
+    using NLog;
     #region Usings
     using Qlik.Engine;
     using Qlik.Sense.Client;
@@ -21,7 +22,7 @@ namespace q2gconhypercubeqvx.QlikApplication
     public class QlikDimensions
     {
         #region Logger
-        private static ConnectorLogger logger = ConnectorLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Variables
