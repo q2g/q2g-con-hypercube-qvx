@@ -54,7 +54,9 @@ namespace q2gconhypercubeqvx
         private QvxTable GetData(ScriptCode script, ConnectorParameter parameter)
         {
             try
-            {                
+            {
+                Thread.Sleep(12000);
+
                 var qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
                 if(qlikApp == null)
                   return  new QvxTable();

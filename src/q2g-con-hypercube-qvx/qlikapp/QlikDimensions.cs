@@ -71,13 +71,9 @@ namespace q2gconhypercubeqvx.QlikApplication
                 {
                     var listboxes = GetFieldDefs(text);
                     if (listboxes.Count > 0)
-                    {
                         results.AddRange(listboxes);
-                    }  
                     else
-                    {
-                        results.Add(new QlikListbox(text, SenseApp));
-                    } 
+                        throw new Exception($"The selection \"{text}\" could not be found.");
                 }
 
                 return results;
