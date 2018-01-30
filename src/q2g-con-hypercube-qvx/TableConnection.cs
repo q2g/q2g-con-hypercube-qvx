@@ -55,6 +55,8 @@ namespace q2gconhypercubeqvx
         {
             try
             {
+                Thread.Sleep(12000);
+
                 var qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
                 if (qlikApp == null)
                     return new QvxTable();
