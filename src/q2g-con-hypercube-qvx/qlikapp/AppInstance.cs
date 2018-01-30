@@ -198,10 +198,18 @@ namespace q2gconhypercubeqvx.QlikApplication
 
         public static ConnectorParameter Create(Dictionary<string, string> MParameters)
         {
-            MParameters.TryGetValue("host", out string host);
-            MParameters.TryGetValue("isDesktop", out string isDesktop);
-            MParameters.TryGetValue("UserId", out string user);
-            MParameters.TryGetValue("Password", out string password);
+            string host = "";
+            string isDesktop = "true";
+            string user = "";
+            string password = "";
+            MParameters?.TryGetValue("host", out host);
+            MParameters?.TryGetValue("isDesktop", out isDesktop);
+            MParameters?.TryGetValue("UserId", out user);
+            MParameters?.TryGetValue("Password", out password);
+            host = host ?? "";
+            isDesktop = isDesktop ?? "true";
+            user = user ?? "";
+            password = password ?? "";
             return new ConnectorParameter(isDesktop.ToLowerInvariant() == "true",host, user, password);
         }
             
