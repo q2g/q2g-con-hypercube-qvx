@@ -100,7 +100,7 @@ namespace q2gconhypercubeqvx.QlikApplication
                 }
 
                 activeApp = new QlikApp(appId, connectUri, qlikAuth);
-                if (appId != null && activeApp.Connect())
+                if (appId != null && activeApp.Connect(true))
                 {
                     var session = sessionMem.FirstOrDefault(s => s.UserName == parameter.UserName) ?? null;
                     if(session == null)

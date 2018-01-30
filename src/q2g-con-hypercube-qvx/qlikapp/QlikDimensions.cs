@@ -73,7 +73,7 @@ namespace q2gconhypercubeqvx.QlikApplication
                     if (listboxes.Count > 0)
                         results.AddRange(listboxes);
                     else
-                        throw new Exception($"The selection \"{text}\" could not be found.");
+                        throw new Exception($"The dimension \"{text}\" could not be found.");
                 }
 
                 return results;

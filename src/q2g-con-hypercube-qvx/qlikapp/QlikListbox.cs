@@ -145,6 +145,17 @@ namespace q2gconhypercubeqvx.QlikApplication
             Selection.ClearSelections();
         }
 
+        public bool SelectValue(string match)
+        {
+            if (Selection.SearchFor(match))
+            {
+                Selection.GetLayout();
+                Selection.AcceptSearch(false);
+                return true;
+            }
+            return false;
+        }
+
         public void SelectValues(List<int> indecs)
         {
             SelectValuesInternal(indecs);

@@ -68,6 +68,12 @@ namespace q2gconhypercubeqvx.QlikApplication
         #endregion
 
         #region public methods
+        public bool SelectValue(string filterText, string match)
+        {
+            var listBox = Dimensions.GetSelections(new List<string>() { filterText }).FirstOrDefault() ?? null;
+            return listBox?.SelectValue(match) ?? false;
+        }
+
         public void SelectAllValues(string filterText)
         {
             SelectAllValues(new List<string>() { filterText });
