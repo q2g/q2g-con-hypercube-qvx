@@ -52,28 +52,11 @@ namespace q2gconhypercubeqvx.QlikApplication
             FilterText = filtertext;
             Selection = CreateSession();
             Selection.GetLayout();
-            Selection.Changed += Selection_Changed;
             CurrentIndex = -1;
             Id = Guid.NewGuid();
         }
 
         #region private methods
-        private void Selection_Changed(object sender, EventArgs e)
-        {
-            var count = 0;
-
-            try
-            {
-                var listbox = sender as Listbox;
-                var listObj = listbox.GetLayout() as ListboxLayout;
-                count = listObj?.ListObject?.DimensionInfo?.Cardinal ?? 0;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-            }
-        }
-
         private Listbox CreateSession()
         {
             var session = SenseApp.CreateGenericSessionObject(
