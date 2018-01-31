@@ -132,6 +132,7 @@ namespace q2gconhypercubeqvx
                 if (match != null)
                 {
                     var whereValue = match.Groups[1].Value;
+                    logger.Debug($"Where Statemant {whereValue} found.");
                     if (whereValue.ToLowerInvariant().Contains(" or "))
                         throw new Exception("The \"OR\" operator is not allowed in a where statement.");
 
@@ -144,13 +145,7 @@ namespace q2gconhypercubeqvx
                         var sqlFilter = new SQLFilter(split[0]);
                         var values = split[1].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                         foreach (var value in values)
-                        {
-                            if (value.StartsWith("="))
-                                sqlFilter.IsFormula = true;
-
-                            sqlFilter.Values.Add(value.Trim());
-                        }
-                            
+                            sqlFilter.Values.Add(value.Trim());  
                         Filter.Add(sqlFilter);
                     }
                 }
@@ -177,7 +172,6 @@ namespace q2gconhypercubeqvx
 
         public string Name { get; private set; }
         public List<string> Values { get; private set; }
-        public bool IsFormula { get; set; }
     }
     #endregion
 }

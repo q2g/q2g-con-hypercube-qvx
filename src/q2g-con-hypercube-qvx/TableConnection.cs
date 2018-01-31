@@ -54,18 +54,19 @@ namespace q2gconhypercubeqvx
         private QvxTable GetData(ScriptCode script, ConnectorParameter parameter)
         {
             try
-            {                
+            {
                 var qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
-                if(qlikApp == null)
-                  return  new QvxTable();
+                if (qlikApp == null)
+                    return new QvxTable();
                 foreach (var filter in script.Filter)
                 {
-                    var results = filter.Values;
-                    if (filter.IsFormula)
-                        results = new List<string>() { (qlikApp.FirstSession.CurrentApp.EvaluateExAsync(filter.Values.First()).Result.Text) };
-                    qlikApp.FirstSession.Selections.SelectValues(filter.Name, results);
-                }
-
+                    foreach (var value in filter.Values)
+                    {
+                        var result = qlikApp.FirstSession.Selections.SelectValue(filter.Name, value);
+                        logger.Debug($"Select Filter {filter.Name} - Result: {result}");
+                    }
+                }  
+                
                 var resultTable = tableFunctions.GetTableInfosFromApp($"Table_{script.AppId}_{script.ObjectId}", script, parameter, qlikApp);
                 return resultTable.QvxTable;
             }

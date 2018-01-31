@@ -23,3 +23,18 @@ or
 1. Clone the Github Repo
 2. Open the .sln in Visual Studio
 3. Compile
+
+## Logging
+
+The Qlik Connector using the NLog libary.
+You can change the log settings in the "NLog.config".
+
+### change the log path
+
+The default path is linked to the directory "%appdata%\q2g\q2g-con-hypercube-qvx".
+This you can change in the specified attribute "fileName" and "archiveFileName".
+
+### change the log level
+
+The log level is set to "warn" in the standard case.
+You can set this via the attribute "minlevel".
