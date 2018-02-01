@@ -15,6 +15,7 @@ namespace q2gconhypercubeqvx.QlikApplication
     using Qlik.Sense.Client.Visualizations;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -147,12 +148,22 @@ namespace q2gconhypercubeqvx.QlikApplication
 
         public bool SelectValue(string match)
         {
-            return Selection.SearchForAsync(match)
-                   .ContinueWith<bool>((result) =>
-                   {
-                       Selection.AcceptSearch(false);
-                       return true;
-                   }).Result;
+            try
+            {
+                var task = Selection.SearchListObjectForAsync("/qListObjectDef", match)
+                            .ContinueWith(t => Selection.GetLayoutAsync())
+                            .Unwrap()
+                            .ContinueWith(t => Selection.AcceptListObjectSearchAsync("/qListObjectDef", false))
+                            .Unwrap();
+
+                task.Wait();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return false;
+            }
         }
 
         public void SelectValues(List<int> indecs)

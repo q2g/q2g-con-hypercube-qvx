@@ -71,9 +71,15 @@ namespace q2gconhypercubeqvx.QlikApplication
                 {
                     var listboxes = GetFieldDefs(text);
                     if (listboxes.Count > 0)
+                    {
                         results.AddRange(listboxes);
+                        logger.Info($"The master element \"{text}\" was found.");
+                    }
                     else
-                        throw new Exception($"The dimension \"{text}\" could not be found.");
+                    {
+                        results.Add(new QlikListbox(text, SenseApp));
+                        logger.Info($"The filter text \"{text}\" is not a master element.");
+                    }
                 }
 
                 return results;

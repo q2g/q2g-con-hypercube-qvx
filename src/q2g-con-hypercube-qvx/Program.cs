@@ -9,6 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconhypercubeqvx
 {
+    using NLog;
     #region Usings
     using System;
     using System.Windows.Forms;
@@ -16,21 +17,32 @@ namespace q2gconhypercubeqvx
 
     static class Program
     {
+        #region Logger
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        #endregion
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main(string[] args)
         {
-            if (args != null && args.Length >= 2)
+            try
             {
-                new TableServer().Run(args[0], args[1]);
+                if (args != null && args.Length >= 2)
+                {
+                    new TableServer().Run(args[0], args[1]);
+                }
+                else
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new frmMain());
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new frmMain());
+                logger.Error(ex);
             }
         }
     }
