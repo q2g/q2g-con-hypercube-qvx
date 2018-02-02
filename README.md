@@ -28,6 +28,7 @@ or
 
 The Qlik Connector using the NLog libary.
 You can change the log settings in the "NLog.config".
+More Information about Nlog can be found here: https://github.com/NLog/NLog/wiki/Tutorial
 
 ### change the log path
 
@@ -37,4 +38,4 @@ This you can change in the specified attribute "fileName" and "archiveFileName".
 ### change the log level
 
 The log level is set to "warn" in the standard case.
-You can set this via the attribute "minlevel".
+You can set this via attribute "minlevel".

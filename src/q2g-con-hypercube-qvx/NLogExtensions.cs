@@ -9,41 +9,42 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconhypercubeqvx
 {
-    using NLog;
     #region Usings
     using System;
-    using System.Windows.Forms;
+    using System.Threading.Tasks;
     #endregion
 
-    static class Program
+    public static class TaskNLogExtensions
     {
-        #region Logger
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-        #endregion
-
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main(string[] args)
+        public static Task<T> DefaultIfFaulted<T>(this Task<T> @this)
         {
-            try
+            return @this.ContinueWith(t => t.IsCanceled || t.IsFaulted ? default(T) : t.Result);
+        }
+
+        public static Task<T> DefaultAndLogIfFaulted<T>(this Task<T> @this, NLog.Logger logger)
+        {
+            return @this.ContinueWith(t =>
             {
-                if (args != null && args.Length >= 2)
+                if (@this.IsFaulted)
                 {
-                    new TableServer().Run(args[0], args[1]);
+                    foreach (var ex in @this.Exception.InnerExceptions)
+                        logger.Error(ex);
                 }
-                else
-                {
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new frmMain());
-                }
-            }
-            catch (Exception ex)
+
+                return t.IsCanceled || t.IsFaulted ? default(T) : t.Result;
+            });
+        }
+
+        public static Task LogIfFaulted(this Task @this, NLog.Logger logger)
+        {
+            return @this.ContinueWith(t =>
             {
-                logger.Error(ex);
-            }
+                if (@this.IsFaulted)
+                {
+                    foreach (var ex in @this.Exception.InnerExceptions)
+                        logger.Error(ex);
+                }
+            });
         }
     }
 }

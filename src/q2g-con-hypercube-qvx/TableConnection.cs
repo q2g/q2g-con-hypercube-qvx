@@ -63,10 +63,14 @@ namespace q2gconhypercubeqvx
                     foreach (var value in filter.Values)
                     {
                         var result = qlikApp.FirstSession.Selections.SelectValue(filter.Name, value);
-                        logger.Debug($"Select Filter {filter.Name} - Result: {result}");
+                        if(result == false)
+                        {
+                            logger.Error($"The Dimension \"{filter.Name}\" could not found.");
+                            return null;
+                        }
                     }
-                }  
-                
+                }
+
                 var resultTable = tableFunctions.GetTableInfosFromApp($"Table_{script.AppId}_{script.ObjectId}", script, parameter, qlikApp);
                 return resultTable.QvxTable;
             }
@@ -100,6 +104,7 @@ namespace q2gconhypercubeqvx
             catch (Exception ex)
             {
                 logger.Error(ex, "The query could not be executed.");
+                LogManager.Flush();
                 return new QvxDataTable(new QvxTable() { TableName = "Error" });
             }
         }
