@@ -84,16 +84,13 @@ namespace q2gconhypercubeqvx
                     TableName = tableName,
                 };
 
-                var width = 0;
                 HyperCubePager pager = null;
                 IEnumerable<int> columnOrder = null;
                 var fields = new List<QvxField>();
                 var rows = new List<QvxDataRow>();
 
-                if (qlikApp == null)
-                {                    
+                if (qlikApp == null)                
                     qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
-                }
 
                 if (qlikApp == null)
                     return null;
@@ -101,18 +98,18 @@ namespace q2gconhypercubeqvx
                 var masterObject = qlikApp.FirstSession.CurrentApp.GetMasterObjectAsync(script.ObjectId).Result;
                 if (masterObject != null)
                 {
+                    logger.Debug($"find master object: {script.ObjectId}");
                     var genericObject = qlikApp.FirstSession.CurrentApp.CreateGenericSessionObjectAsync(masterObject.Properties).Result;
                     pager = genericObject.GetAllHyperCubePagers().FirstOrDefault() ?? null;
                     var tableLayout = genericObject.GetLayout().As<TableLayout>();
                     var hyperCube = tableLayout.HyperCube;
-                    width = hyperCube.ColumnWidths.Count();
                     columnOrder = hyperCube.ColumnOrder;
                     fields.AddRange(GetHyperCubeFields(hyperCube.DimensionInfo, hyperCube.MeasureInfo, script));
                 }
                 var table = qlikApp.FirstSession.CurrentApp.GetObjectAsync<Table>(script.ObjectId).Result;
                 if (table != null)
                 {
-                    width = table.ColumnWidths.Count();
+                    logger.Debug($"table object: {script.ObjectId}");
                     pager = table.HyperCubePager;
                     columnOrder = table.ColumnOrder;
                     fields.AddRange(GetHyperCubeFields(table.DimensionInfo, table.MeasureInfo, script));
@@ -125,17 +122,19 @@ namespace q2gconhypercubeqvx
 
                 if (script != null)
                 {
-                    var initalPage = new NxPage { Top = 0, Left = 0, Width = width, Height = preview.MaxCount };
+                    var initalPage = new NxPage { Top = 0, Left = 0, Width = fields.Count, Height = preview.MaxCount };
                     var allPages = new List<IEnumerable<NxDataPage>>();
                     allPages.Add(pager.GetData(new List<NxPage>() { initalPage }));
                     if (script.Full)
                     {
-                        initalPage = new NxPage { Top = 0, Left = 0, Width = width, Height = 1000 };
+                        logger.Debug($"read data - column count: {fields.Count}");
+                        initalPage = new NxPage { Top = 0, Left = 0, Width = fields.Count, Height = 500 };
                         allPages = pager.IteratePages(new[] { initalPage }, Pager.Next).ToList();
                         preview.MaxCount = 0;
                     }
                     if (allPages == null)
                         throw new Exception($"no dimension in table {script.ObjectId} exits.");
+                    logger.Debug($"read pages - count {allPages.Count}");
                     foreach (var page in allPages)
                     {
                         var allMatrix = page?.SelectMany(p => p.Matrix);
@@ -167,6 +166,7 @@ namespace q2gconhypercubeqvx
 
                 resultTable.Fields = fields.ToArray();
                 resultTable.GetRows = () => { return rows; };
+                logger.Debug($"return table {resultTable.TableName}");
                 return new TableHelper(resultTable, preview);
             }
             catch (Exception ex)
