@@ -88,6 +88,7 @@ namespace q2gconhypercubeqvx
                 IEnumerable<int> columnOrder = null;
                 var fields = new List<QvxField>();
                 var rows = new List<QvxDataRow>();
+                var size = new Size();
 
                 if (qlikApp == null)                
                     qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
@@ -104,6 +105,7 @@ namespace q2gconhypercubeqvx
                     var tableLayout = genericObject.GetLayout().As<TableLayout>();
                     var hyperCube = tableLayout.HyperCube;
                     columnOrder = hyperCube.ColumnOrder;
+                    size = hyperCube.Size;
                     fields.AddRange(GetHyperCubeFields(hyperCube.DimensionInfo, hyperCube.MeasureInfo, script));
                 }
                 var table = qlikApp.FirstSession.CurrentApp.GetObjectAsync<Table>(script.ObjectId).Result;
@@ -112,6 +114,7 @@ namespace q2gconhypercubeqvx
                     logger.Debug($"table object: {script.ObjectId}");
                     pager = table.HyperCubePager;
                     columnOrder = table.ColumnOrder;
+                    size = table.Size;
                     fields.AddRange(GetHyperCubeFields(table.DimensionInfo, table.MeasureInfo, script));
                 }
 
@@ -122,13 +125,14 @@ namespace q2gconhypercubeqvx
 
                 if (script != null)
                 {
-                    var initalPage = new NxPage { Top = 0, Left = 0, Width = fields.Count, Height = preview.MaxCount };
+                    var initalPage = new NxPage { Top = 0, Left = 0, Width = size.cx, Height = preview.MaxCount };
                     var allPages = new List<IEnumerable<NxDataPage>>();
                     allPages.Add(pager.GetData(new List<NxPage>() { initalPage }));
                     if (script.Full)
                     {
-                        logger.Debug($"read data - column count: {fields.Count}");
-                        initalPage = new NxPage { Top = 0, Left = 0, Width = fields.Count, Height = 500 };
+                        var pageHeight = Math.Min(size.cy * size.cx, 5000) / size.cx;
+                        logger.Debug($"read data - column count: {size.cx}");
+                        initalPage = new NxPage { Top = 0, Left = 0, Width = size.cx, Height = pageHeight };
                         allPages = pager.IteratePages(new[] { initalPage }, Pager.Next).ToList();
                         preview.MaxCount = 0;
                     }
