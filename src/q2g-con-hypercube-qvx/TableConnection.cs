@@ -60,8 +60,10 @@ namespace q2gconhypercubeqvx
                     return new QvxTable();
                 foreach (var filter in script.Filter)
                 {
+                    logger.Debug($"Filter: {filter}");
                     foreach (var value in filter.Values)
                     {
+                        logger.Debug($"");
                         var result = qlikApp.FirstSession.Selections.SelectValue(filter.Name, value);
                         if(result == false)
                         {
@@ -88,17 +90,18 @@ namespace q2gconhypercubeqvx
             try
             {
                 AppInstance.LoadMemory();
+                logger.Debug($"Parse query {query}");
                 var script = ScriptCode.Parse(query);
                 if (script == null)
                     throw new Exception("The sql script is not valid.");
              
                 var parameter = ConnectorParameter.Create(MParameters);
-
                 var qvxTable = GetData(script, parameter);
                 var result = new QvxDataTable(qvxTable);
                 result.Select(qvxTable.Fields);
                 AppInstance.SaveMemory();
                 AppInstance.Dispose();
+                logger.Debug($"Send result table {qvxTable.TableName}");
                 return result;
             }
             catch (Exception ex)

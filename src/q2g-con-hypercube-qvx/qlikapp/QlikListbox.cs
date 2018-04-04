@@ -9,7 +9,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconhypercubeqvx.QlikApplication
 {
-    using NLog;
     #region Usings
     using Qlik.Engine;
     using Qlik.Sense.Client.Visualizations;
@@ -19,6 +18,7 @@ namespace q2gconhypercubeqvx.QlikApplication
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using NLog;
     #endregion
 
     public class QlikListbox
