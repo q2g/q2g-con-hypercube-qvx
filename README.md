@@ -1,4 +1,5 @@
 # q2g-con-hypercube-qvx
+[![CodeFactor](https://www.codefactor.io/repository/github/q2g/q2g-con-hypercube-qvx/badge)](https://www.codefactor.io/repository/github/q2g/q2g-con-hypercube-qvx)
 [![Downloads](https://m.sense2go.net/downloads.svg?q2g-con-hypercube-qvx)](https://m.sense2go.net/extension-package)
 
 Qlik Connector that allows to consume a Qlik HyperCube / Table as new datasource
