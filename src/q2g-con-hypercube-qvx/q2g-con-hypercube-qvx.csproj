@@ -52,48 +52,29 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<TypeScriptCompile Include="web\helper.d.ts" />
+		<TypeScriptCompile Include="web\*.ts" />
 
-		<TypeScriptCompile Include="web\connector-main.ts" />
-		<Content Include="web\connector-main.js">
-			<DependentUpon>connector-main.ts</DependentUpon>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<TypeScriptCompile Include="web\selectdialog.ts" />
-		<Content Include="web\selectdialog.js">
-			<DependentUpon>selectdialog.ts</DependentUpon>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<TypeScriptCompile Include="web\connectdialog.ts" />
-		<Content Include="web\connectdialog.js">
-			<DependentUpon>connectdialog.ts</DependentUpon>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
+		<Content Include="web\connector-main.js" DependentUpon="connector-main.ts" CopyToOutputDirectory="Always" />
 
-		<Content Include="web\connectdialog.css">
-			<DependentUpon>connectdialog.less</DependentUpon>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="web\connectdialog.ng.html">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="compilerconfig.json.defaults">
-			<DependentUpon>compilerconfig.json</DependentUpon>
-		</Content>
+		<Content Include="web\selectdialog.js" DependentUpon="selectdialog.ts" CopyToOutputDirectory="Always" />
+		<Content Include="web\connectdialog.js" DependentUpon="connectdialog.ts" CopyToOutputDirectory="Always" />
+
+		<Content Include="web\connectdialog.css" DependentUpon="connectdialog.less" CopyToOutputDirectory="Always" />
+		<Content Include="web\connectdialog.ng.html" CopyToOutputDirectory="Always" />
+
+		<Content Include="compilerconfig.json.defaults" DependentUpon="compilerconfig.json" />
+
 		<None Include="tsconfig.json" />
+		<None Remove="web\*.js.map" />
+		<None Remove="web\.gitignore" />
+		<None Remove="lib\*" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Update="frmMain.cs">
 			<SubType>Form</SubType>
 		</Compile>
-		<Compile Update="frmMain.Designer.cs">
-			<SubType>Form</SubType>
-			<DependentUpon>frmMain.cs</DependentUpon>
-		</Compile>
-		<None Update="frmMain.resx">
-			<DependentUpon>frmMain.cs</DependentUpon>
-		</None>
+		<Compile Update="frmMain.Designer.cs" SubType="Form" DependentUpon="frmMain.cs"/>
 	</ItemGroup>
 
 	<Target Name="verpatch" AfterTargets="Build">
