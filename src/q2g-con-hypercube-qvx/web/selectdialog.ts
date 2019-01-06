@@ -51,7 +51,7 @@ export =
             standardSelectDialogService.showStandardDialog(dialogContentProvider, {
                 precedingLoadVisible: false,
                 fieldsAreSelectable: true,
-                allowFieldRename: false,               
+                allowFieldRename: false,
                 scriptGenerator: {
                     generateScriptForSelections (a, b, c, d) {
                         
@@ -81,7 +81,7 @@ export =
                         return script;
                     },
 
-                    maybeQuote(a, d, e) {                        
+                    maybeQuote(a, d, e) {
                         return false;
                     }
                 }
