@@ -11,19 +11,19 @@ namespace q2gconhypercubeqvx
 {
     #region Usings
     using System;
-    using QlikView.Qvx.QvxLibrary;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using System.Collections.Generic;
-    using q2gconhypercubeqvx.QlikApplication;
-    using Qlik.Sense.Client.Visualizations;
-    using System.Linq;
-    using Qlik.Engine;
-    using Qlik.Sense.Client;
-    using System.IO;
-    using System.Reflection;
     using Newtonsoft.Json;
     using NLog;
+    using q2gconhypercubeqvx.QlikApplication;
+    using Qlik.Engine;
+    using Qlik.Sense.Client;
+    using Qlik.Sense.Client.Visualizations;
+    using QlikView.Qvx.QvxLibrary;
     #endregion
 
     public class TableServer : QvxServer
@@ -51,7 +51,7 @@ namespace q2gconhypercubeqvx
         {
             var databaseList = new List<QlikView.Qvx.QvxLibrary.Database>();
             try
-            {               
+            {
                 var qlikApp = AppInstance.GetQlikInstance(parameter);
                 if (qlikApp == null)
                     return new QvDataContractDatabaseListResponse { qDatabases = databaseList.ToArray() };
@@ -72,7 +72,7 @@ namespace q2gconhypercubeqvx
             var tables = new List<QvxTable>();
 
             try
-            {                
+            {
                 var qlikApp = AppInstance.GetQlikInstance(parameter, appId);
                 if (qlikApp == null)
                     return new QvDataContractTableListResponse { qTables = tables };
@@ -176,7 +176,7 @@ namespace q2gconhypercubeqvx
             try
             {
                 QvDataContractResponse response;
-                AppInstance.LoadMemory();                 
+                AppInstance.LoadMemory();
                 var parameter = ConnectorParameter.Create(connection?.MParameters);
                 logger.Trace($"HandleJsonRequest {method}");
                 switch (method)
@@ -210,7 +210,7 @@ namespace q2gconhypercubeqvx
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ToJson(new Info { qMessage = "Error "+ ex.ToString() });
+                return ToJson(new Info { qMessage = "Error " + ex.ToString() });
             }
         }
         #endregion
