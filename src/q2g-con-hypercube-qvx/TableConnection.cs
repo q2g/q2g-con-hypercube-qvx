@@ -12,17 +12,17 @@ namespace q2gconhypercubeqvx
     #region Usings
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Text;
-    using QlikView.Qvx.QvxLibrary;
-    using System.IO;
-    using System.Diagnostics;
     using System.Threading;
-    using Qlik.Sense.Client.Visualizations;
-    using Qlik.Engine;
-    using q2gconhypercubeqvx.QlikApplication;
-    using Qlik.Sense.Client;
     using NLog;
+    using q2gconhypercubeqvx.QlikApplication;
+    using Qlik.Engine;
+    using Qlik.Sense.Client;
+    using Qlik.Sense.Client.Visualizations;
+    using QlikView.Qvx.QvxLibrary;
     #endregion
 
     public class TableConnection : QvxConnection
@@ -65,7 +65,7 @@ namespace q2gconhypercubeqvx
                     {
                         logger.Debug($"");
                         var result = qlikApp.FirstSession.Selections.SelectValue(filter.Name, value);
-                        if(result == false)
+                        if (result == false)
                         {
                             logger.Error($"The Dimension \"{filter.Name}\" could not found.");
                             return null;
@@ -94,7 +94,7 @@ namespace q2gconhypercubeqvx
                 var script = ScriptCode.Parse(query);
                 if (script == null)
                     throw new Exception("The sql script is not valid.");
-             
+
                 var parameter = ConnectorParameter.Create(MParameters);
                 var qvxTable = GetData(script, parameter);
                 var result = new QvxDataTable(qvxTable);

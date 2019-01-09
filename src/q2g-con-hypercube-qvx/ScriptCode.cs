@@ -82,7 +82,7 @@ namespace q2gconhypercubeqvx
         #region Methods
         private Match GetMatch(string regex)
         {
-            var formatScript = Script.Replace("\r\n", " ").Replace("\"","").Trim();
+            var formatScript = Script.Replace("\r\n", " ").Replace("\"", "").Trim();
             var match = Regex.Match(formatScript, regex, RegexOptions.IgnoreCase);
             if (match.Success)
                 return match;
@@ -145,7 +145,7 @@ namespace q2gconhypercubeqvx
                         var sqlFilter = new SQLFilter(split[0]);
                         var values = split[1].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                         foreach (var value in values)
-                            sqlFilter.Values.Add(value.Trim());  
+                            sqlFilter.Values.Add(value.Trim());
                         Filter.Add(sqlFilter);
                     }
                 }

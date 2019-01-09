@@ -10,15 +10,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace q2gconhypercubeqvx
 {
     #region Usings
-    using Qlik.Engine;
-    using Qlik.Sense.Client;
-    using Qlik.Sense.Client.Visualizations;
-    using q2gconhypercubeqvx.QlikApplication;
-    using QlikView.Qvx.QvxLibrary;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using NLog;
+    using q2gconhypercubeqvx.QlikApplication;
+    using Qlik.Engine;
+    using Qlik.Sense.Client;
+    using Qlik.Sense.Client.Visualizations;
+    using QlikView.Qvx.QvxLibrary;
     #endregion
 
     public class TableFunc
@@ -90,7 +90,7 @@ namespace q2gconhypercubeqvx
                 var rows = new List<QvxDataRow>();
                 var size = new Size();
 
-                if (qlikApp == null)                
+                if (qlikApp == null)
                     qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
 
                 if (qlikApp == null)
@@ -120,7 +120,7 @@ namespace q2gconhypercubeqvx
 
                 var preview = new PreviewResponse()
                 {
-                     MaxCount = 15,
+                    MaxCount = 15,
                 };
 
                 if (script != null)
