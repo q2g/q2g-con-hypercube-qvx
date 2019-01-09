@@ -65,7 +65,7 @@ class ConnectDialog {
                     this.host = "";
 
                 list = connStr.match("isDesktop=([^;]*);");
-                this.isDesktop = list.length == 2 && list[1] == "true";                                
+                this.isDesktop = list.length == 2 && list[1] == "true";
             });
         }
 
@@ -91,7 +91,7 @@ class ConnectDialog {
             this.connectionInfo = "Please enter a name for the connection.";
         } else {
             if (this.isEdit) {
-                var overrideCredentials = this.username !== this.olduser || this.password !== "**********";                
+                var overrideCredentials = this.username !== this.olduser || this.password !== "**********";
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,
