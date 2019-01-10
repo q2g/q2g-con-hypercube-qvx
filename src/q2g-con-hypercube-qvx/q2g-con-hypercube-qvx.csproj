@@ -49,6 +49,8 @@
 		<TypeScriptSourceMap>True</TypeScriptSourceMap>
 		<TypeScriptMapRoot />
 		<TypeScriptSourceRoot />
+		<ApplicationIcon />
+		<StartupObject />
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -68,13 +70,6 @@
 		<None Remove="web\*.js.map" />
 		<None Remove="web\.gitignore" />
 		<None Remove="lib\*" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="frmMain.cs">
-			<SubType>Form</SubType>
-		</Compile>
-		<Compile Update="frmMain.Designer.cs" SubType="Form" DependentUpon="frmMain.cs"/>
 	</ItemGroup>
 
 	<Target Name="verpatch" AfterTargets="Build">
