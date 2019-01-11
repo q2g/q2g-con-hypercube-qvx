@@ -67,20 +67,13 @@
 		<None Remove="web\.gitignore" />
 		<None Remove="lib\*" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="frmMain.cs">
-			<SubType>Form</SubType>
-		</Compile>
-		<Compile Update="frmMain.Designer.cs" SubType="Form" DependentUpon="frmMain.cs" />
-	</ItemGroup>
-
+   
 	<ItemGroup>
 	  <None Update="App.config">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
-
+   
 	<Target Name="verpatch" AfterTargets="Build">
 		<Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
 		<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G Sense App&quot;" />
