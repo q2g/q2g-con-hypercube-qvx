@@ -65,7 +65,6 @@
 		<None Include="tsconfig.json" />
 		<None Remove="web\*.js.map" />
 		<None Remove="web\.gitignore" />
-		<None Remove="lib\*" />
 	</ItemGroup>
    
 	<ItemGroup>
