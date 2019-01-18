@@ -9,6 +9,7 @@
     <Description></Description>
 
     <Version>$(GitVersion_NuGetVersion)</Version>
+    <VersionInfo>$(GitVersion_InformationalVersion)</VersionInfo>
     <RootNamespace>q2gconhypercubeqvx</RootNamespace>
   </PropertyGroup>
 
@@ -16,6 +17,9 @@
     <CreateProperty Value="0.0.1-notgitversion" Condition="'$(GitVersion_NuGetVersion)' == ''">
       <Output TaskParameter="Value" PropertyName="Version" />
     </CreateProperty>
+    <PropertyGroup Condition="'$(GitVersion_NuGetVersion)' == ''">
+      <DefineConstants>$(DefineConstants);MISSINGGIT;</DefineConstants>
+    </PropertyGroup>
   </Target>
 
   <ItemGroup>
@@ -74,6 +78,9 @@
   </ItemGroup>
 
   <Target Name="verpatch" AfterTargets="Build">
+    <CreateProperty Value="0.0.1-notgitversion" Condition="'$(GitVersion_InformationalVersion)' == ''">
+      <Output TaskParameter="Value" PropertyName="VersionInfo" />
+    </CreateProperty>
     <Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
     <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G Sense App&quot;" />
     <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
