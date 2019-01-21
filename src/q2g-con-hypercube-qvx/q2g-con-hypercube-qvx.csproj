@@ -7,9 +7,7 @@
     <Authors>Konrad Mattheis, Martin Berthold</Authors>
     <Company>q2g</Company>
     <Description></Description>
-
     <Version>$(GitVersion_NuGetVersion)</Version>
-    <VersionInfo>$(GitVersion_InformationalVersion)</VersionInfo>
     <RootNamespace>q2gconhypercubeqvx</RootNamespace>
   </PropertyGroup>
 
@@ -20,6 +18,16 @@
     <PropertyGroup Condition="'$(GitVersion_NuGetVersion)' == ''">
       <DefineConstants>$(DefineConstants);MISSINGGIT;</DefineConstants>
     </PropertyGroup>
+  </Target>
+
+  <Target Name="FixOnGitVersionInfoTaskError" BeforeTargets="GetAssemblyVersion">
+    <CreateProperty Value="$(GitVersion_InformationalVersion)">
+      <Output TaskParameter="Value" PropertyName="FullVersionInfo" />
+    </CreateProperty>
+    <PropertyGroup Condition="'$(GitVersion_InformationalVersion)' == ''">
+      <FullVersionInfo>0.0.1-notgitversion</FullVersionInfo>
+  </PropertyGroup>
+    <Message Importance="High" Text="InformationalVersion2: $(FullVersionInfo)" />
   </Target>
 
   <ItemGroup>
@@ -78,18 +86,15 @@
   </ItemGroup>
 
   <Target Name="verpatch" AfterTargets="Build">
-    <CreateProperty Value="0.0.1-notgitversion" Condition="'$(GitVersion_InformationalVersion)' == ''">
-      <Output TaskParameter="Value" PropertyName="VersionInfo" />
-    </CreateProperty>
-    <Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
+    <Message Importance="High" Text="InformationalVersion: $(FullVersionInfo)" />
     <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G Sense App&quot;" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(FullVersionInfo)" />
     <CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />
     <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
   </Target>
 
   <Target Name="ZipPacked">
-    <Message Importance="High" Text="Version:$(GitVersion_InformationalVersion)" />
+    <Message Importance="High" Text="Version:$(FullVersionInfo)" />
     <Message Importance="High" Text="OutputPath: $(OutputPath)" />
     <ItemGroup>
       <ZipFiles Include="$(OutputPath)\*.*" />
