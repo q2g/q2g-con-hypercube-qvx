@@ -27,7 +27,6 @@
     <PropertyGroup Condition="'$(GitVersion_InformationalVersion)' == ''">
       <FullVersionInfo>0.0.1-notgitversion</FullVersionInfo>
   </PropertyGroup>
-    <Message Importance="High" Text="InformationalVersion2: $(FullVersionInfo)" />
   </Target>
 
   <ItemGroup>
