@@ -26,7 +26,7 @@
     </CreateProperty>
     <PropertyGroup Condition="'$(GitVersion_InformationalVersion)' == ''">
       <FullVersionInfo>0.0.1-notgitversion</FullVersionInfo>
-  </PropertyGroup>
+    </PropertyGroup>
   </Target>
 
   <ItemGroup>
