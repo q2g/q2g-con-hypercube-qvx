@@ -33,7 +33,7 @@
     <PackageReference Include="BuildWebCompiler" Version="1.12.394" PrivateAssets="all" />
     <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
-    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="NLog" Version="4.6.0" />
     <PackageReference Include="QlikSense.NetSDK" version="13.8.0.0" />
     <Reference Include="QvxLibrary">
       <HintPath>lib\QvxLibrary.dll</HintPath>
