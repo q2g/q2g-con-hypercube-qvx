@@ -13,6 +13,7 @@ namespace q2gconhypercubeqvx
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Newtonsoft.Json.Linq;
     using NLog;
     using Q2G.ConnectorConnection;
@@ -109,23 +110,29 @@ namespace q2gconhypercubeqvx
 
                 if (script != null)
                 {
-                    var initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = preview.MaxCount };
-                    var pages = tableObject.GetHyperCubeDataAsync("/qHyperCubeDef", new List<NxPage>() { initalPage }).Result;
-                    var allPages = new List<IEnumerable<NxDataPage>> { pages };
+                    var allPages = new List<IEnumerable<NxDataPage>>();
                     if (script.Full)
                     {
+                        //DataLoad
+                        preview.MaxCount = 0;
                         var pageHeight = Math.Min(size.qcy * size.qcx, 5000) / size.qcx;
                         logger.Debug($"read data - column count: {size.qcx}");
-                        initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = pageHeight };
-                        var counter = Math.Ceiling(Convert.ToDouble(size.qcy) / Convert.ToDouble(pageHeight));
-                        for (int i = 0; i < counter; i++)
+                        var counter = Convert.ToInt32(Math.Ceiling(Convert.ToDouble(size.qcy) / Convert.ToDouble(pageHeight)));
+                        allPages = new List<IEnumerable<NxDataPage>>(counter);
+                        Parallel.For(0, counter, i =>
                         {
-                            var top = i * (pageHeight + 1);
-                            initalPage.qTop = top;
-                            pages = tableObject.GetHyperCubeDataAsync("/qHyperCubeDef", new List<NxPage>() { initalPage }).Result;
+                            var initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = pageHeight };
+                            initalPage.qTop = i * pageHeight;
+                            var pages = tableObject.GetHyperCubeDataAsync("/qHyperCubeDef", new List<NxPage>() { initalPage }).Result;
                             allPages.Add(pages);
-                        }
-                        preview.MaxCount = 0;
+                        });
+                    }
+                    else
+                    {
+                        //Preview
+                        var initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = preview.MaxCount };
+                        var pages = tableObject.GetHyperCubeDataAsync("/qHyperCubeDef", new List<NxPage>() { initalPage }).Result;
+                        allPages.Add(pages);
                     }
                     if (allPages == null)
                         throw new Exception($"no dimension in table {script.ObjectId} exits.");
