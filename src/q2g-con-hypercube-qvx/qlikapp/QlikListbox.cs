@@ -1,206 +1,262 @@
-﻿#region License
-/*
-Copyright (c) 2018 Konrad Mattheis und Martin Berthold
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-#endregion
-
-namespace q2gconhypercubeqvx.QlikApplication
+﻿namespace Q2G.ConnectorConnection
 {
     #region Usings
-    using Qlik.Engine;
-    using Qlik.Sense.Client.Visualizations;
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
     using NLog;
+    using Qlik.EngineAPI;
     #endregion
 
-    public class QlikListbox
+    public class QlikSessionObject
     {
         #region Logger
         private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Properties & Variables
-        private Listbox Selection { get; set; }
+        private IGenericObject GenericObject { get; set; }
         private int CurrentIndex { get; set; }
-        private IApp SenseApp { get; set; }
+        private IDoc SenseApp { get; set; }
         private string FilterText { get; }
-
-        public Guid Id { get; }
-        public string FirstName
-        {
-            get
-            {
-                var values = GetValues();
-                if (values.Count > 0)
-                    return values[0];
-
-                return String.Empty;
-            }
-        }
+        private int Cardinal { get; set; }
         #endregion
 
-        public QlikListbox(string filtertext, IApp senseApp)
+        #region Constructor
+        public QlikSessionObject(string filtertext, IDoc senseApp)
         {
             SenseApp = senseApp;
             FilterText = filtertext;
-            Selection = CreateSession();
-            Selection.GetLayout();
+            GenericObject = GetGenericObject();
+            Cardinal = GetListObject()?.qDimensionInfo?.qCardinal ?? 0;
             CurrentIndex = -1;
-            Id = Guid.NewGuid();
-        }
-
-        #region private methods
-        private Listbox CreateSession()
-        {
-            var session = SenseApp.CreateGenericSessionObject(
-            new ListboxProperties()
-            {
-                Info = new NxInfo() { Type = "listbox" },
-                ListObjectDef = new ListboxListObjectDef
-                {
-                    InitialDataFetch = new NxPage[] { new NxPage() { Height = 0, Top = 0 } },
-                    Def = new ListboxListObjectDimensionDef()
-                    {
-                        FieldDefs = new List<string>() { FilterText },
-                        FieldLabels = new List<string>() { Guid.NewGuid().ToString() },
-                        SortCriterias = new List<SortCriteria> { new SortCriteria() { SortByState = SortDirection.Ascending } },
-                    },
-                    ShowAlternatives = false,
-                },
-            });
-
-            return session as Listbox;
-        }
-
-        private List<NxCell> GetFieldCells()
-        {
-            var listData = Selection.GetListObjectData("/qListObjectDef", new List<NxPage>() { new NxPage() { Left = 0, Top = 0, Height = Selection.DimensionInfo.Cardinal, Width = 1 } });
-            var dataPage = listData.SingleOrDefault();
-            if (dataPage != null)
-            {
-                var results = dataPage.Matrix.Select(i => i.First()).Where(s => s.State != StateEnumType.EXCLUDED).ToList();
-                return results;
-            }
-
-            return new List<NxCell>();
-        }
-
-        private List<int> GetAllIndecs(IList<NxCell> cells)
-        {
-            var results = cells.ToList().Select(c => c.ElemNumber).ToList();
-            return results;
-        }
-
-        private List<int> GetIndecs(IList<NxCell> cells, IList<string> values)
-        {
-            if (values == null)
-            {
-                return null;
-            }
-
-            var count = cells.Where(c => values.Contains(c.Text)).Count();
-            if (count == 0)
-            {
-                return null;
-            }
-
-            var results = cells.Where(c => values.Contains(c.Text)).Select(e => e.ElemNumber).ToList();
-            return results;
-        }
-
-        private void SelectValuesInternal(List<int> indecs)
-        {
-            Selection.BeginSelections();
-            Selection.SelectValues(indecs, true);
-            Selection.EndSelections(true);
-        }
-
-        private NxCell GetFieldCellFromIndex(int index)
-        {
-            var dataPages = Selection.GetData(new NxPage[] { new NxPage() { Height = Selection.DimensionInfo.Cardinal, Top = 0 } });
-            var firstPage = dataPages.FirstOrDefault() ?? null;
-            if (firstPage != null)
-            {
-                var matrix = firstPage.Matrix.ToList();
-                if (index < matrix.Count)
-                {
-                    return matrix[index].FirstOrDefault() ?? null;
-                }
-            }
-
-            return null;
         }
         #endregion
 
-        #region public methods
-        public void ClearSelections()
-        {
-            Selection.ClearSelections();
-        }
-
-        public bool SelectValue(string match)
+        #region Private Methods
+        private IGenericObject GetGenericObject()
         {
             try
             {
-                var task = Selection.SearchListObjectForAsync("/qListObjectDef", match)
-                            .ContinueWith(t => Selection.GetLayoutAsync())
-                            .Unwrap()
-                            .ContinueWith(t => Selection.AcceptListObjectSearchAsync("/qListObjectDef", false))
-                            .Unwrap();
+                var request = JObject.FromObject(new
+                {
+                    qProp = new
+                    {
+                        qInfo = new
+                        {
+                            qType = "ListObject"
+                        },
+                        qListObjectDef = new
+                        {
+                            qInitialDataFetch = new List<NxPage>
+                        {
+                        new NxPage() { qTop = 0, qHeight = 0, qLeft = 0, qWidth = 0 }
+                        },
+                            qDef = new
+                            {
+                                qFieldDefs = new List<string>
+                            {
+                                FilterText
+                            },
+                                qFieldLabels = new List<string>
+                            {
+                                $"Label: {FilterText}"
+                            },
+                                qSortCriterias = new List<SortCriteria>
+                            {
+                                new SortCriteria() { qSortByState = 1 }
+                            }
+                            },
+                            qShowAlternatives = false,
+                        }
+                    }
+                });
 
-                task.Wait();
-                return true;
+                return SenseApp.CreateSessionObjectAsync(request).Result;
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
+                throw new Exception("Can´t create a session object", ex);
+            }
+        }
+
+        private ListObject GetListObject()
+        {
+            return GenericObject.GetLayoutAsync<JObject>()
+            .ContinueWith<ListObject>((res) =>
+            {
+                try
+                {
+                    var listLayout = res.Result as dynamic;
+                    return listLayout.qListObject.ToObject<ListObject>();
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, $"The method \"{nameof(GetListObject)}\" has an error.");
+                    return null;
+                }
+            }).Result;
+        }
+
+        private bool SelectValuesInternal(List<int> indecs)
+        {
+            BeginSelections();
+            var selectRes = SelectListObjectValues(indecs);
+            if (!selectRes)
+            {
+                EndSelections(false);
+                return false;
+            }
+            return EndSelections(true);
+        }
+
+        private NxCell GetFieldCellFromIndexAsync(int index)
+        {
+            var request = JObject.FromObject(new
+            {
+                qPath = "/qListObjectDef",
+                qPages = new List<NxPage>
+                {
+                    new NxPage()
+                    {
+                            qTop = 0,
+                            qLeft = 0,
+                            qWidth = 1,
+                            qHeight = Cardinal,
+                    }
+                 }
+            });
+
+            return GenericObject.GetListObjectDataAsync<JArray>(request)
+            .ContinueWith<NxCell>((res2) =>
+            {
+                var genObjData = res2.Result;
+                var dataPages = genObjData.ToObject<List<NxDataPage>>();
+                var firstPage = dataPages.FirstOrDefault() ?? null;
+                if (firstPage != null)
+                {
+                    var matrix = firstPage.qMatrix.ToList();
+                    if (index < matrix.Count)
+                        return matrix[index].FirstOrDefault() ?? null;
+                }
+                return null;
+            }).Result;
+        }
+        #endregion
+
+        #region Public Methods
+        public void ResetIndex()
+        {
+            CurrentIndex = -1;
+        }
+
+        public GenericObjectLayout GetLayout()
+        {
+            try
+            {
+                return GenericObject.GetLayoutAsync().Result;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(GetLayout)}\" was failed.");
+                return null;
+            }
+        }
+
+        public async Task AcceptListObjectSearchAsync(bool toggleMode)
+        {
+            try
+            {
+                await GenericObject.AcceptListObjectSearchAsync("/qListObjectDef", toggleMode);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(AcceptListObjectSearchAsync)}\" was failed.");
+            }
+        }
+
+        public bool SearchListObjectFor(string match)
+        {
+            try
+            {
+                return GenericObject.SearchListObjectForAsync("/qListObjectDef", match).Result;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(SearchListObjectFor)}\" was failed.");
                 return false;
             }
         }
 
-        public void SelectValues(List<int> indecs)
-        {
-            SelectValuesInternal(indecs);
-        }
-
-        public void SelectValues(List<string> values)
-        {
-            var cells = GetFieldCells();
-            var indecs = GetIndecs(cells, values);
-            if (indecs != null)
-                SelectValuesInternal(indecs);
-        }
-
-        public List<string> GetValues()
-        {
-            var cells = GetFieldCells();
-            return cells.Select(s => s.Text).ToList();
-        }
-
-        public List<string> GetValuesSort()
-        {
-            var values = GetValues();
-            values.Sort();
-            return values;
-        }
-
-        public void SelectAll()
+        public bool ClearSelections()
         {
             try
             {
-                Selection.SelectPossible();
+                GenericObject.ClearSelectionsAsync("/qListObjectDef").Wait();
+                return true;
             }
             catch (Exception ex)
             {
-                throw new Exception("The selection of all items could not work.", ex);
+                logger.Error(ex, $"The method \"{nameof(ClearSelections)}\" was failed.");
+                return false;
+            }
+        }
+
+        public bool BeginSelections()
+        {
+            try
+            {
+                GenericObject.BeginSelectionsAsync(new List<string> { "/qListObjectDef" });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(BeginSelections)}\" was failed.");
+                return false;
+            }
+        }
+
+        public bool SelectListObjectValues(List<int> indecs, bool toggleMode = true)
+        {
+            try
+            {
+                return GenericObject.SelectListObjectValuesAsync("/qListObjectDef", indecs, toggleMode).Result;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(SelectListObjectValues)}\" was failed.");
+                return false;
+            }
+        }
+
+        public bool EndSelections(bool accept)
+        {
+            try
+            {
+                GenericObject.EndSelectionsAsync(accept).Wait();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(EndSelections)}\" was failed.");
+                return false;
+            }
+        }
+
+        public bool SelectPossible()
+        {
+            try
+            {
+                return GenericObject.SelectListObjectPossibleAsync("/qListObjectDef").Result;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(SelectPossible)}\" was failed.");
+                return false;
             }
         }
 
@@ -208,27 +264,29 @@ namespace q2gconhypercubeqvx.QlikApplication
         {
             try
             {
-                Selection.ClearSelections();
-
+                ClearSelections();
                 CurrentIndex++;
-                var listObj = Selection.GetLayout() as ListboxLayout;
-                var count = listObj?.ListObject?.DimensionInfo?.Cardinal ?? 0;
+                var listObj = GetListObject();
+                var count = listObj?.qDimensionInfo?.qCardinal ?? 0;
                 if ((CurrentIndex >= count))
                 {
                     CurrentIndex = -1;
                     return null;
                 }
 
-                var cell = GetFieldCellFromIndex(CurrentIndex);
+                var cell = GetFieldCellFromIndexAsync(CurrentIndex);
                 if (cell != null)
                 {
-                    if (cell.State == StateEnumType.EXCLUDED)
+                    if (cell.qState == StateEnumType.EXCLUDED || cell.qState == StateEnumType.X)
                         return null;
                 }
+                else
+                    throw new Exception($"No nxcell for selection {FilterText} with index {CurrentIndex} found.");
 
-                SelectValuesInternal(new List<int> { cell.ElemNumber });
-
-                return new FlatSelection(FilterText, cell.Text, cell.ElemNumber, cell.State);
+                var selectResult = SelectValuesInternal(new List<int> { cell.qElemNumber });
+                if (!selectResult)
+                    throw new Exception($"The selection {FilterText} for element number {cell?.qElemNumber} could not execute.");
+                return new FlatSelection(FilterText, cell.qText, cell.qElemNumber, cell.qState);
             }
             catch (Exception ex)
             {
@@ -238,30 +296,48 @@ namespace q2gconhypercubeqvx.QlikApplication
         #endregion
     }
 
-    #region helper classes
+    #region Helper Classes
     public class SelectionGroup
     {
+        #region Properties & Varibales
+        public List<FlatSelection> FlatSelections { get; }
+        public Guid Id { get; }
+        #endregion
+
         public SelectionGroup()
         {
             FlatSelections = new List<FlatSelection>();
             Id = Guid.NewGuid();
         }
 
-        public List<FlatSelection> FlatSelections { get; }
-        public Guid Id { get; }
-
         public string GetFlatValues()
         {
             var sb = new StringBuilder();
             foreach (var sel in FlatSelections)
                 sb.Append($"{sel.Name}:{sel.Value}={sel.ElementNumber}/{sel.State.ToString()} \r\n");
-            
+
             return sb.ToString().Trim();
+        }
+
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            foreach (var sel in FlatSelections)
+                result.Append($"{sel.Value} ");
+            return result.ToString().Trim();
         }
     }
 
     public class FlatSelection
     {
+        #region Properties & Variables
+        public string Name { get; }
+        public string Value { get; set; }
+        public string AlternativName { get; set; }
+        public int ElementNumber { get; }
+        public StateEnumType State { get; }
+        #endregion
+
         public FlatSelection(string name, string value, int number, StateEnumType state)
         {
             Name = name;
@@ -269,11 +345,6 @@ namespace q2gconhypercubeqvx.QlikApplication
             ElementNumber = number;
             State = state;
         }
-
-        public string Name { get; }
-        public string Value { get; }
-        public int ElementNumber { get; }
-        public StateEnumType State { get; }
 
         public override string ToString()
         {

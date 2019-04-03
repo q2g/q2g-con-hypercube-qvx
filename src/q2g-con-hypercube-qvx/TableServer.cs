@@ -12,17 +12,11 @@ namespace q2gconhypercubeqvx
     #region Usings
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text.RegularExpressions;
     using System.Threading;
-    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using NLog;
-    using q2gconhypercubeqvx.QlikApplication;
-    using Qlik.Engine;
-    using Qlik.Sense.Client;
-    using Qlik.Sense.Client.Visualizations;
+    using Q2G.ConnectorConnection;
+    using Qlik.EngineAPI;
     using QlikView.Qvx.QvxLibrary;
     #endregion
 
@@ -52,10 +46,9 @@ namespace q2gconhypercubeqvx
             var databaseList = new List<QlikView.Qvx.QvxLibrary.Database>();
             try
             {
-                var qlikApp = AppInstance.GetQlikInstance(parameter);
-                if (qlikApp == null)
-                    return new QvDataContractDatabaseListResponse { qDatabases = databaseList.ToArray() };
-                var apps = qlikApp.GetAllApps();
+                var config = QlikApp.CreateConfig(parameter);
+                var qlikApp = new QlikApp();
+                var apps = qlikApp.GetAllApps(config);
                 foreach (var app in apps)
                     databaseList.Add(new QlikView.Qvx.QvxLibrary.Database() { qName = app });
                 return new QvDataContractDatabaseListResponse { qDatabases = databaseList.ToArray() };
@@ -70,29 +63,31 @@ namespace q2gconhypercubeqvx
         private QvDataContractResponse GetTables(ConnectorParameter parameter, string appId)
         {
             var tables = new List<QvxTable>();
+            Q2G.ConnectorConnection.Connection connection = null;
 
             try
             {
-                var qlikApp = AppInstance.GetQlikInstance(parameter, appId);
-                if (qlikApp == null)
-                    return new QvDataContractTableListResponse { qTables = tables };
-                var options = new NxGetObjectOptions() { Types = new List<string> { "table" } };
-                var appObjects = qlikApp.FirstSession.CurrentApp.GetObjectsAsync(options).Result;
-                foreach (var obj in appObjects)
+                var config = QlikApp.CreateConfig(parameter, appId);
+                var qlikApp = new QlikApp();
+                connection = qlikApp.CreateNewConnection(config);
+                var options = new NxGetObjectOptions() { qTypes = new List<string> { "table" } };
+                var tablesObjects = connection.CurrentApp.GetObjectsAsync(options).Result;
+                foreach (var obj in tablesObjects)
                 {
-                    var table = obj.AsObject<Table>();
-                    tables.Add(new QvxTable() { TableName = $"{table.Title} [{table.Id}]" });
+                    var tableObject = connection.CurrentApp.GetObjectAsync(obj.qInfo.qId).Result;
+                    dynamic layout = tableObject.GetLayoutAsync<JObject>().Result;
+                    tables.Add(new QvxTable() { TableName = $"{layout.title} [{obj.qInfo.qId}]" });
                 }
-                var masterObjectList = qlikApp.FirstSession.CurrentApp.GetMasterObjectListAsync().Result;
-                var listLayout = masterObjectList?.GetLayout()?.As<MasterObjectListLayout>();
-                if (listLayout != null)
+
+                options = new NxGetObjectOptions() { qTypes = new List<string> { "masterobject" } };
+                var visualisations = connection.CurrentApp.GetObjectsAsync(options).Result;
+                foreach (var element in visualisations)
                 {
-                    foreach (var item in listLayout.AppObjectList.Items)
-                    {
-                        if (item.Data.Visualization == "table")
-                            tables.Add(new QvxTable() { TableName = $"{item.Data.Title} [{item.Info.Id}]" });
-                    }
+                    var tableObject = connection.CurrentApp.GetObjectAsync(element.qInfo.qId).Result;
+                    dynamic layout = tableObject.GetLayoutAsync<JObject>().Result;
+                    tables.Add(new QvxTable() { TableName = $"{layout.qMeta.title} [{element.qInfo.qId}]" });
                 }
+
                 return new QvDataContractTableListResponse { qTables = tables };
             }
             catch (Exception ex)
@@ -100,17 +95,26 @@ namespace q2gconhypercubeqvx
                 logger.Error(ex, $"tables form app {appId} not loaded.");
                 return new QvDataContractTableListResponse { qTables = tables };
             }
+            finally
+            {
+                connection?.Close();
+            }
         }
 
         private QvDataContractResponse GetFields(ConnectorParameter parameter, string appId, string objectId)
         {
+            Q2G.ConnectorConnection.Connection connection = null;
+
             try
             {
                 var oId = GetObjectId(objectId);
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for field table found.");
                 var script = ScriptCode.Create(appId, oId);
-                var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, parameter);
+                var config = QlikApp.CreateConfig(parameter, appId);
+                var qlikApp = new QlikApp();
+                connection = qlikApp.CreateNewConnection(config);
+                var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, connection.CurrentApp);
                 if (resultTable == null)
                     throw new Exception("no field table found.");
                 return new QvDataContractFieldListResponse { qFields = resultTable.QvxTable.Fields };
@@ -120,17 +124,26 @@ namespace q2gconhypercubeqvx
                 logger.Error(ex, $"fields from app {appId} and table {objectId} not loaded.");
                 return new QvDataContractFieldListResponse { qFields = new QvxField[0] };
             }
+            finally
+            {
+                connection?.Close();
+            }
         }
 
         private QvDataContractResponse GetPreview(ConnectorParameter parameter, string appId, string objectId)
         {
+            Q2G.ConnectorConnection.Connection connection = null;
+
             try
             {
                 var oId = GetObjectId(objectId);
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for preview table found.");
+                var config = QlikApp.CreateConfig(parameter, appId);
+                var qlikApp = new QlikApp();
+                connection = qlikApp.CreateNewConnection(config);
                 var script = ScriptCode.Create(appId, oId);
-                var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, parameter);
+                var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, connection.CurrentApp);
                 if (resultTable == null)
                     throw new Exception("no preview table found.");
                 return resultTable.Preview;
@@ -139,6 +152,10 @@ namespace q2gconhypercubeqvx
             {
                 logger.Error(ex, $"fields from app {appId} and table {objectId} not loaded.");
                 return new TableFunc.PreviewResponse();
+            }
+            finally
+            {
+                connection?.Close();
             }
         }
         #endregion
@@ -176,7 +193,6 @@ namespace q2gconhypercubeqvx
             try
             {
                 QvDataContractResponse response;
-                AppInstance.LoadMemory();
                 var parameter = ConnectorParameter.Create(connection?.MParameters);
                 logger.Trace($"HandleJsonRequest {method}");
                 switch (method)
@@ -203,8 +219,6 @@ namespace q2gconhypercubeqvx
                         response = new Info { qMessage = "Unknown command" };
                         break;
                 }
-                AppInstance.SaveMemory();
-                AppInstance.Dispose();
                 return ToJson(response);
             }
             catch (Exception ex)

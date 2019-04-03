@@ -13,11 +13,10 @@ namespace q2gconhypercubeqvx
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Newtonsoft.Json.Linq;
     using NLog;
-    using q2gconhypercubeqvx.QlikApplication;
-    using Qlik.Engine;
-    using Qlik.Sense.Client;
-    using Qlik.Sense.Client.Visualizations;
+    using Q2G.ConnectorConnection;
+    using Qlik.EngineAPI;
     using QlikView.Qvx.QvxLibrary;
     #endregion
 
@@ -39,7 +38,7 @@ namespace q2gconhypercubeqvx
             return code.Fields.IndexOf(field) > -1;
         }
 
-        private List<QvxField> GetHyperCubeFields(IEnumerable<TableHyperCubeDimensionq> dimensions, IEnumerable<TableHyperCubeMeasureq> measures, ScriptCode script = null)
+        private List<QvxField> GetHyperCubeFields(List<NxDimensionInfo> dimensions, List<NxMeasureInfo> measures, ScriptCode script = null)
         {
             var fields = new List<QvxField>();
 
@@ -47,9 +46,9 @@ namespace q2gconhypercubeqvx
             {
                 foreach (var dimInfo in dimensions)
                 {
-                    if (IsUsedField(dimInfo.FallbackTitle, script))
+                    if (IsUsedField(dimInfo.qFallbackTitle, script))
                     {
-                        fields.Add(new QvxField(dimInfo.FallbackTitle, QvxFieldType.QVX_TEXT,
+                        fields.Add(new QvxField(dimInfo.qFallbackTitle, QvxFieldType.QVX_TEXT,
                                             QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
                                             QlikView.Qvx.QvxLibrary.FieldAttrType.ASCII));
                     }
@@ -57,9 +56,9 @@ namespace q2gconhypercubeqvx
 
                 foreach (var measureInfo in measures)
                 {
-                    if (IsUsedField(measureInfo.FallbackTitle, script))
+                    if (IsUsedField(measureInfo.qFallbackTitle, script))
                     {
-                        fields.Add(new QvxField(measureInfo.FallbackTitle, QvxFieldType.QVX_TEXT,
+                        fields.Add(new QvxField(measureInfo.qFallbackTitle, QvxFieldType.QVX_TEXT,
                                             QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
                                             QlikView.Qvx.QvxLibrary.FieldAttrType.ASCII));
                     }
@@ -75,7 +74,7 @@ namespace q2gconhypercubeqvx
         #endregion
 
         #region public methods
-        public TableHelper GetTableInfosFromApp(string tableName, ScriptCode script, ConnectorParameter parameter, QlikApp qlikApp = null)
+        public TableHelper GetTableInfosFromApp(string tableName, ScriptCode script, IDoc app)
         {
             try
             {
@@ -84,39 +83,24 @@ namespace q2gconhypercubeqvx
                     TableName = tableName,
                 };
 
-                HyperCubePager pager = null;
                 IEnumerable<int> columnOrder = null;
                 var fields = new List<QvxField>();
                 var rows = new List<QvxDataRow>();
                 var size = new Size();
 
-                if (qlikApp == null)
-                    qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
+                if (app == null)
+                    throw new Exception("No App session.");
 
-                if (qlikApp == null)
-                    return null;
+                var tableObject = app.GetObjectAsync(script.ObjectId).Result;
+                if (tableObject == null)
+                    throw new Exception("No Table object found.");
+                logger.Debug($"TableObject objectId: {script.ObjectId} - objectType {tableObject.qGenericType}");
 
-                var masterObject = qlikApp.FirstSession.CurrentApp.GetMasterObjectAsync(script.ObjectId).Result;
-                if (masterObject != null)
-                {
-                    logger.Debug($"find master object: {script.ObjectId}");
-                    var genericObject = qlikApp.FirstSession.CurrentApp.CreateGenericSessionObjectAsync(masterObject.Properties).Result;
-                    pager = genericObject.GetAllHyperCubePagers().FirstOrDefault() ?? null;
-                    var tableLayout = genericObject.GetLayout().As<TableLayout>();
-                    var hyperCube = tableLayout.HyperCube;
-                    columnOrder = hyperCube.ColumnOrder;
-                    size = hyperCube.Size;
-                    fields.AddRange(GetHyperCubeFields(hyperCube.DimensionInfo, hyperCube.MeasureInfo, script));
-                }
-                var table = qlikApp.FirstSession.CurrentApp.GetObjectAsync<Table>(script.ObjectId).Result;
-                if (table != null)
-                {
-                    logger.Debug($"table object: {script.ObjectId}");
-                    pager = table.HyperCubePager;
-                    columnOrder = table.ColumnOrder;
-                    size = table.Size;
-                    fields.AddRange(GetHyperCubeFields(table.DimensionInfo, table.MeasureInfo, script));
-                }
+                dynamic hyperCubeLayout = tableObject.GetLayoutAsync<JObject>().Result;
+                HyperCube hyperCube = hyperCubeLayout.qHyperCube.ToObject<HyperCube>();
+                columnOrder = hyperCube.qColumnOrder;
+                size = hyperCube.qSize;
+                fields.AddRange(GetHyperCubeFields(hyperCube.qDimensionInfo, hyperCube.qMeasureInfo, script));
 
                 var preview = new PreviewResponse()
                 {
@@ -125,15 +109,22 @@ namespace q2gconhypercubeqvx
 
                 if (script != null)
                 {
-                    var initalPage = new NxPage { Top = 0, Left = 0, Width = size.cx, Height = preview.MaxCount };
-                    var allPages = new List<IEnumerable<NxDataPage>>();
-                    allPages.Add(pager.GetData(new List<NxPage>() { initalPage }));
+                    var initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = preview.MaxCount };
+                    var pages = tableObject.GetHyperCubeDataAsync("/qHyperCubeDef", new List<NxPage>() { initalPage }).Result;
+                    var allPages = new List<IEnumerable<NxDataPage>> { pages };
                     if (script.Full)
                     {
-                        var pageHeight = Math.Min(size.cy * size.cx, 5000) / size.cx;
-                        logger.Debug($"read data - column count: {size.cx}");
-                        initalPage = new NxPage { Top = 0, Left = 0, Width = size.cx, Height = pageHeight };
-                        allPages = pager.IteratePages(new[] { initalPage }, Pager.Next).ToList();
+                        var pageHeight = Math.Min(size.qcy * size.qcx, 5000) / size.qcx;
+                        logger.Debug($"read data - column count: {size.qcx}");
+                        initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = pageHeight };
+                        var counter = Math.Ceiling(Convert.ToDouble(size.qcy) / Convert.ToDouble(pageHeight));
+                        for (int i = 0; i < counter; i++)
+                        {
+                            var top = i * (pageHeight + 1);
+                            initalPage.qTop = top;
+                            pages = tableObject.GetHyperCubeDataAsync("/qHyperCubeDef", new List<NxPage>() { initalPage }).Result;
+                            allPages.Add(pages);
+                        }
                         preview.MaxCount = 0;
                     }
                     if (allPages == null)
@@ -141,7 +132,7 @@ namespace q2gconhypercubeqvx
                     logger.Debug($"read pages - count {allPages.Count}");
                     foreach (var page in allPages)
                     {
-                        var allMatrix = page?.SelectMany(p => p.Matrix);
+                        var allMatrix = page?.SelectMany(p => p.qMatrix);
                         foreach (var matrix in allMatrix)
                         {
                             var row = new QvxDataRow();
@@ -152,11 +143,11 @@ namespace q2gconhypercubeqvx
                                 if (order < fields.Count)
                                 {
                                     var field = fields[order];
-                                    row[field] = matrix[order].Text;
+                                    row[field] = matrix[order].qText;
                                     if (!preview.qPreview.Any(s => s.qValues.Contains(field.FieldName)))
                                         hrow.qValues.Add(field.FieldName);
                                     if (preview.qPreview.Count <= preview.MaxCount)
-                                        drow.qValues.Add(matrix[order].Text);
+                                        drow.qValues.Add(matrix[order].qText);
                                 }
                             }
                             rows.Add(row);
