@@ -35,11 +35,9 @@
     <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
     <PackageReference Include="NLog" Version="4.6.1" />
+    <PackageReference Include="Q2gHelperPem" Version="1.4.5" />
     <PackageReference Include="qlik-engineapi" Version="0.3.0-alpha0015" />
     <PackageReference Include="Ser.Api" Version="3.5.0" />
-    <Reference Include="Q2gHelperPem">
-      <HintPath>..\..\..\..\SenseExcelReporting\q2g-helper-pem-nuget\src\bin\Debug\net452\Q2gHelperPem.dll</HintPath>
-    </Reference>
     <Reference Include="QvxLibrary">
       <HintPath>lib\QvxLibrary.dll</HintPath>
     </Reference>

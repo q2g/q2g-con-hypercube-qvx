@@ -57,7 +57,9 @@
                 return await SenseApp.CreateSessionObjectAsync(request)
                 .ContinueWith((res) =>
                 {
-                    return res.Result.GetLayoutAsync<JObject>();
+                    var layout = res.Result.GetLayoutAsync<JObject>();
+                    SenseApp.DestroySessionObjectAsync(res.Result.qGenericId);
+                    return layout;
                 })
                 .Unwrap()
                 .ContinueWith<List<DimensionDataHelper>>((res2) =>
