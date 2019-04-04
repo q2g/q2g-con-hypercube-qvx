@@ -1,4 +1,4 @@
-﻿namespace Q2G.ConnectorConnection
+﻿namespace q2gconhypercubeqvx.Connection
 {
     #region Usings
     using System;
@@ -7,6 +7,7 @@
     using NLog;
     using Ser.Api;
     using Qlik.EngineAPI;
+    using q2gconhypercubeqvx;
     #endregion
 
     public class QlikApp
@@ -14,6 +15,14 @@
         #region Logger
         private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
+
+        public QlikApp(ConnectorParameter parameter)
+        {
+            if (WinAuth.ValidateWinCredentials(parameter.UserName, parameter.Password))
+            {
+                throw new Exception("The windows credentials was not correct.");
+            }
+        }
 
         public static ConnectionConfig CreateConfig(ConnectorParameter parameter, string app = null)
         {

@@ -15,7 +15,7 @@ namespace q2gconhypercubeqvx
     using System.Threading;
     using Newtonsoft.Json.Linq;
     using NLog;
-    using Q2G.ConnectorConnection;
+    using q2gconhypercubeqvx.Connection;
     using Qlik.EngineAPI;
     using QlikView.Qvx.QvxLibrary;
     #endregion
@@ -47,7 +47,7 @@ namespace q2gconhypercubeqvx
             try
             {
                 var config = QlikApp.CreateConfig(parameter);
-                var qlikApp = new QlikApp();
+                var qlikApp = new QlikApp(parameter);
                 var apps = qlikApp.GetAllApps(config);
                 foreach (var app in apps)
                     databaseList.Add(new QlikView.Qvx.QvxLibrary.Database() { qName = app });
@@ -63,14 +63,14 @@ namespace q2gconhypercubeqvx
         private QvDataContractResponse GetTables(ConnectorParameter parameter, string appId)
         {
             var tables = new List<QvxTable>();
-            Q2G.ConnectorConnection.Connection connection = null;
+            q2gconhypercubeqvx.Connection.Connection connection = null;
 
             using (MappedDiagnosticsLogicalContext.SetScoped("connectionId", connection?.ConnId))
             {
                 try
                 {
                     var config = QlikApp.CreateConfig(parameter, appId);
-                    var qlikApp = new QlikApp();
+                    var qlikApp = new QlikApp(parameter);
                     connection = qlikApp.CreateNewConnection(config);
 
                     var options = new NxGetObjectOptions() { qTypes = new List<string> { "table" } };
@@ -108,7 +108,7 @@ namespace q2gconhypercubeqvx
 
         private QvDataContractResponse GetFields(ConnectorParameter parameter, string appId, string objectId)
         {
-            Q2G.ConnectorConnection.Connection connection = null;
+            q2gconhypercubeqvx.Connection.Connection connection = null;
 
             using (MappedDiagnosticsLogicalContext.SetScoped("connectionId", connection?.ConnId))
             {
@@ -119,7 +119,7 @@ namespace q2gconhypercubeqvx
                         throw new Exception("no object id for field table found.");
                     var script = ScriptCode.Create(appId, oId);
                     var config = QlikApp.CreateConfig(parameter, appId);
-                    var qlikApp = new QlikApp();
+                    var qlikApp = new QlikApp(parameter);
                     connection = qlikApp.CreateNewConnection(config);
                     var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, connection.CurrentApp);
                     if (resultTable == null)
@@ -140,7 +140,7 @@ namespace q2gconhypercubeqvx
 
         private QvDataContractResponse GetPreview(ConnectorParameter parameter, string appId, string objectId)
         {
-            Q2G.ConnectorConnection.Connection connection = null;
+            q2gconhypercubeqvx.Connection.Connection connection = null;
 
             try
             {
@@ -148,7 +148,7 @@ namespace q2gconhypercubeqvx
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for preview table found.");
                 var config = QlikApp.CreateConfig(parameter, appId);
-                var qlikApp = new QlikApp();
+                var qlikApp = new QlikApp(parameter);
                 connection = qlikApp.CreateNewConnection(config);
                 var script = ScriptCode.Create(appId, oId);
                 var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, connection.CurrentApp);

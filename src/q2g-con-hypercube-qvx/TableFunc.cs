@@ -16,7 +16,6 @@ namespace q2gconhypercubeqvx
     using System.Threading.Tasks;
     using Newtonsoft.Json.Linq;
     using NLog;
-    using Q2G.ConnectorConnection;
     using Qlik.EngineAPI;
     using QlikView.Qvx.QvxLibrary;
     #endregion
