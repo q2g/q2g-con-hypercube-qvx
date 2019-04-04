@@ -27,6 +27,10 @@ namespace q2gconhypercubeqvx
         private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
+        #region Properties
+        public static bool Success;
+        #endregion
+
         #region private methods
         private static bool ValidateWinCredentialsInternal(string username, string password, ContextType type)
         {
@@ -47,6 +51,9 @@ namespace q2gconhypercubeqvx
         {
             try
             {
+                if (Success)
+                    return true;
+
                 bool result = false;
                 result = ValidateWinCredentialsInternal(username, password, ContextType.Machine);
                 if(!result)

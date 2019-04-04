@@ -8,6 +8,7 @@
     using Ser.Api;
     using Qlik.EngineAPI;
     using q2gconhypercubeqvx;
+    using System.Threading;
     #endregion
 
     public class QlikApp
@@ -18,7 +19,11 @@
 
         public QlikApp(ConnectorParameter parameter)
         {
-            if (WinAuth.ValidateWinCredentials(parameter.UserName, parameter.Password))
+            var domainUser = new DomainUser(parameter.UserName);
+            if(domainUser == null)
+                throw new Exception("The user must a DomainUser like this UserDirectory\\UserId");
+
+            if (WinAuth.ValidateWinCredentials(domainUser.UserId, parameter.Password))
             {
                 throw new Exception("The windows credentials was not correct.");
             }
