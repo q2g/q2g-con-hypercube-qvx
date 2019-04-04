@@ -65,39 +65,44 @@ namespace q2gconhypercubeqvx
             var tables = new List<QvxTable>();
             Q2G.ConnectorConnection.Connection connection = null;
 
-            try
+            using (MappedDiagnosticsLogicalContext.SetScoped("connectionId", connection?.ConnId))
             {
-                var config = QlikApp.CreateConfig(parameter, appId);
-                var qlikApp = new QlikApp();
-                connection = qlikApp.CreateNewConnection(config);
-                var options = new NxGetObjectOptions() { qTypes = new List<string> { "table" } };
-                var tablesObjects = connection.CurrentApp.GetObjectsAsync(options).Result;
-                foreach (var obj in tablesObjects)
+                try
                 {
-                    var tableObject = connection.CurrentApp.GetObjectAsync(obj.qInfo.qId).Result;
-                    dynamic layout = tableObject.GetLayoutAsync<JObject>().Result;
-                    tables.Add(new QvxTable() { TableName = $"{layout.title} [{obj.qInfo.qId}]" });
-                }
+                    var config = QlikApp.CreateConfig(parameter, appId);
+                    var qlikApp = new QlikApp();
+                    connection = qlikApp.CreateNewConnection(config);
 
-                options = new NxGetObjectOptions() { qTypes = new List<string> { "masterobject" } };
-                var visualisations = connection.CurrentApp.GetObjectsAsync(options).Result;
-                foreach (var element in visualisations)
+                    var options = new NxGetObjectOptions() { qTypes = new List<string> { "table" } };
+                    var tablesObjects = connection.CurrentApp.GetObjectsAsync(options).Result;
+                    foreach (var obj in tablesObjects)
+                    {
+                        var tableObject = connection.CurrentApp.GetObjectAsync(obj.qInfo.qId).Result;
+                        dynamic layout = tableObject.GetLayoutAsync<JObject>().Result;
+                        tables.Add(new QvxTable() { TableName = $"{layout.title} [{obj.qInfo.qId}]" });
+                    }
+
+                    options = new NxGetObjectOptions() { qTypes = new List<string> { "masterobject" } };
+                    var visualisations = connection.CurrentApp.GetObjectsAsync(options).Result;
+                    foreach (var element in visualisations)
+                    {
+                        var tableObject = connection.CurrentApp.GetObjectAsync(element.qInfo.qId).Result;
+                        dynamic layout = tableObject.GetLayoutAsync<JObject>().Result;
+                        tables.Add(new QvxTable() { TableName = $"{layout.qMeta.title} [{element.qInfo.qId}]" });
+                    }
+
+                    return new QvDataContractTableListResponse { qTables = tables };
+
+                }
+                catch (Exception ex)
                 {
-                    var tableObject = connection.CurrentApp.GetObjectAsync(element.qInfo.qId).Result;
-                    dynamic layout = tableObject.GetLayoutAsync<JObject>().Result;
-                    tables.Add(new QvxTable() { TableName = $"{layout.qMeta.title} [{element.qInfo.qId}]" });
+                    logger.Error(ex, $"tables form app {appId} not loaded.");
+                    return new QvDataContractTableListResponse { qTables = tables };
                 }
-
-                return new QvDataContractTableListResponse { qTables = tables };
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, $"tables form app {appId} not loaded.");
-                return new QvDataContractTableListResponse { qTables = tables };
-            }
-            finally
-            {
-                connection?.Close();
+                finally
+                {
+                    connection?.Close();
+                }
             }
         }
 
@@ -105,28 +110,31 @@ namespace q2gconhypercubeqvx
         {
             Q2G.ConnectorConnection.Connection connection = null;
 
-            try
+            using (MappedDiagnosticsLogicalContext.SetScoped("connectionId", connection?.ConnId))
             {
-                var oId = GetObjectId(objectId);
-                if (String.IsNullOrEmpty(oId))
-                    throw new Exception("no object id for field table found.");
-                var script = ScriptCode.Create(appId, oId);
-                var config = QlikApp.CreateConfig(parameter, appId);
-                var qlikApp = new QlikApp();
-                connection = qlikApp.CreateNewConnection(config);
-                var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, connection.CurrentApp);
-                if (resultTable == null)
-                    throw new Exception("no field table found.");
-                return new QvDataContractFieldListResponse { qFields = resultTable.QvxTable.Fields };
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, $"fields from app {appId} and table {objectId} not loaded.");
-                return new QvDataContractFieldListResponse { qFields = new QvxField[0] };
-            }
-            finally
-            {
-                connection?.Close();
+                try
+                {
+                    var oId = GetObjectId(objectId);
+                    if (String.IsNullOrEmpty(oId))
+                        throw new Exception("no object id for field table found.");
+                    var script = ScriptCode.Create(appId, oId);
+                    var config = QlikApp.CreateConfig(parameter, appId);
+                    var qlikApp = new QlikApp();
+                    connection = qlikApp.CreateNewConnection(config);
+                    var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, connection.CurrentApp);
+                    if (resultTable == null)
+                        throw new Exception("no field table found.");
+                    return new QvDataContractFieldListResponse { qFields = resultTable.QvxTable.Fields };
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, $"fields from app {appId} and table {objectId} not loaded.");
+                    return new QvDataContractFieldListResponse { qFields = new QvxField[0] };
+                }
+                finally
+                {
+                    connection?.Close();
+                }
             }
         }
 
