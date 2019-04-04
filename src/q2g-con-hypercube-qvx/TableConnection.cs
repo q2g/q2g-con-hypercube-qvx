@@ -12,17 +12,14 @@ namespace q2gconhypercubeqvx
     #region Usings
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Text;
-    using QlikView.Qvx.QvxLibrary;
-    using System.IO;
-    using System.Diagnostics;
     using System.Threading;
-    using Qlik.Sense.Client.Visualizations;
-    using Qlik.Engine;
-    using q2gconhypercubeqvx.QlikApplication;
-    using Qlik.Sense.Client;
     using NLog;
+    using Q2G.ConnectorConnection;
+    using QlikView.Qvx.QvxLibrary;
     #endregion
 
     public class TableConnection : QvxConnection
@@ -53,19 +50,24 @@ namespace q2gconhypercubeqvx
 
         private QvxTable GetData(ScriptCode script, ConnectorParameter parameter)
         {
+            Q2G.ConnectorConnection.Connection connection = null;
+
             try
             {
-                var qlikApp = AppInstance.GetQlikInstance(parameter, script.AppId);
-                if (qlikApp == null)
+                var config = QlikApp.CreateConfig(parameter, script.AppId);
+                var qlikApp = new QlikApp();
+                connection = qlikApp.CreateNewConnection(config);
+                if(!connection.Connect())
                     return new QvxTable();
+
                 foreach (var filter in script.Filter)
                 {
                     logger.Debug($"Filter: {filter}");
                     foreach (var value in filter.Values)
                     {
-                        logger.Debug($"");
-                        var result = qlikApp.FirstSession.Selections.SelectValue(filter.Name, value);
-                        if(result == false)
+                        var selection = new QlikSelections(connection.CurrentApp);
+                        var result = selection.SelectValue(filter.Name, value);
+                        if (result == false)
                         {
                             logger.Error($"The Dimension \"{filter.Name}\" could not found.");
                             return null;
@@ -73,13 +75,17 @@ namespace q2gconhypercubeqvx
                     }
                 }
 
-                var resultTable = tableFunctions.GetTableInfosFromApp($"Table_{script.AppId}_{script.ObjectId}", script, parameter, qlikApp);
+                var resultTable = tableFunctions.GetTableInfosFromApp($"Table_{script.AppId}_{script.ObjectId}", script, connection.CurrentApp);
                 return resultTable.QvxTable;
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "The table script can not be executed.");
                 return new QvxTable();
+            }
+            finally
+            {
+                connection?.Close();
             }
         }
         #endregion
@@ -89,18 +95,15 @@ namespace q2gconhypercubeqvx
         {
             try
             {
-                AppInstance.LoadMemory();
                 logger.Debug($"Parse query {query}");
                 var script = ScriptCode.Parse(query);
                 if (script == null)
                     throw new Exception("The sql script is not valid.");
-             
+
                 var parameter = ConnectorParameter.Create(MParameters);
                 var qvxTable = GetData(script, parameter);
                 var result = new QvxDataTable(qvxTable);
                 result.Select(qvxTable.Fields);
-                AppInstance.SaveMemory();
-                AppInstance.Dispose();
                 logger.Debug($"Send result table {qvxTable.TableName}");
                 return result;
             }

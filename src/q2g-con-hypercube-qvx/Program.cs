@@ -9,10 +9,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconhypercubeqvx
 {
-    using NLog;
     #region Usings
     using System;
-    using System.Windows.Forms;
+    using NLog;
     #endregion
 
     static class Program
@@ -24,21 +23,14 @@ namespace q2gconhypercubeqvx
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
         static void Main(string[] args)
         {
             try
             {
                 if (args != null && args.Length >= 2)
-                {
                     new TableServer().Run(args[0], args[1]);
-                }
                 else
-                {
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new frmMain());
-                }
+                    logger.Warn("Run the connector from qlik under Data load editor.");
             }
             catch (Exception ex)
             {

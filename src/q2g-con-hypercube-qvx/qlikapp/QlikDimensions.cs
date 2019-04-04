@@ -1,22 +1,14 @@
-﻿#region License
-/*
-Copyright (c) 2018 Konrad Mattheis und Martin Berthold
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-#endregion
-
-namespace q2gconhypercubeqvx.QlikApplication
+﻿namespace Q2G.ConnectorConnection
 {
-    using NLog;
     #region Usings
-    using Qlik.Engine;
-    using Qlik.Sense.Client;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json.Linq;
+    using NLog;
+    using Qlik.EngineAPI;
     #endregion
 
     public class QlikDimensions
@@ -25,48 +17,133 @@ namespace q2gconhypercubeqvx.QlikApplication
         private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
-        #region Variables
-        private Qlik.Sense.Client.DimensionList Values { get; set; }
-        private IApp SenseApp { get; set; }
+        #region Properties & Variables
+        private List<DimensionDataHelper> Dimensions { get; set; }
+        private IDoc SenseApp { get; set; }
         #endregion
 
-        public QlikDimensions(IApp senseApp)
+        #region Constructor
+        public QlikDimensions(IDoc senseApp)
         {
             SenseApp = senseApp;
-            Values = SenseApp.GetDimensionList() as Qlik.Sense.Client.DimensionList;
+            Dimensions = GetDimensionListAsync().Result;
         }
+        #endregion
 
-        private List<QlikListbox> GetFieldDefs(string text)
-        {
-            var results = new List<QlikListbox>();
-            foreach (var item in Values.Items)
-            {
-                var dimID = SenseApp.GetDimension(item.Info.Id);
-                var title = dimID.MetaAttributes.Title;
-                var dim = dimID.Dim;
-
-                if (dim.Grouping == NxGrpType.GRP_NX_HIEARCHY ||
-                    dim.Grouping == NxGrpType.GRP_NX_NONE)
-                {
-                    if (text == title)
-                    {
-                        var fieldDefs = dim.FieldDefs;
-                        foreach (var fieldDef in fieldDefs)
-                        {
-                            results.Add(new QlikListbox(fieldDef, SenseApp));
-                        }
-                    }
-                }
-            }
-
-            return results;
-        }
-
-        public List<QlikListbox> GetSelections(List<string> filterTexts)
+        #region Private Methods
+        private async Task<List<DimensionDataHelper>> GetDimensionListAsync()
         {
             try
             {
-                var results = new List<QlikListbox>();
+                var request = JObject.FromObject(new
+                {
+                    qProp = new
+                    {
+                        qInfo = new
+                        {
+                            qType = "DimensionList"
+                        },
+                        qDimensionListDef = new
+                        {
+                            qType = "dimension",
+                            qData = new
+                            {
+                                grouping = "/qDim"
+                            }
+                        }
+                    }
+                });
+
+                return await SenseApp.CreateSessionObjectAsync(request)
+                .ContinueWith((res) =>
+                {
+                    var layout = res.Result.GetLayoutAsync<JObject>();
+                    SenseApp.DestroySessionObjectAsync(res.Result.qGenericId);
+                    return layout;
+                })
+                .Unwrap()
+                .ContinueWith<List<DimensionDataHelper>>((res2) =>
+                {
+                    var ret = res2.Result as dynamic;
+                    var dimList = ret.qDimensionList;
+                    var result = new List<DimensionDataHelper>();
+                    foreach (var qitem in dimList.qItems)
+                    {
+                        var defs = qitem.qData.grouping.qFieldDefs as JToken;
+                        var grouping = qitem.qData.grouping.qGrouping.ToObject<NxGrpType>();
+                        result.Add(new DimensionDataHelper()
+                        {
+                            Id = qitem.qInfo.qId,
+                            Title = qitem.qMeta.title,
+                            Grouping = grouping,
+                            FieldDefs = defs.ToObject<List<string>>(),
+                        });
+                    }
+                    return result;
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Can´t initialize dimensions.");
+                return null;
+            }
+        }
+
+        private List<QlikSessionObject> GetFieldDefs(string filterText)
+        {
+            try
+            {
+                var results = new List<QlikSessionObject>();
+                foreach (var dim in Dimensions)
+                {
+                    if (dim.Grouping == NxGrpType.GRP_NX_HIEARCHY ||
+                        dim.Grouping == NxGrpType.GRP_NX_NONE)
+                    {
+                        if (dim.Title == filterText)
+                        {
+                            foreach (var fieldDef in dim.FieldDefs)
+                                results.Add(new QlikSessionObject(fieldDef, SenseApp));
+                        }
+                    }
+                }
+                return results;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The method \"{nameof(GetFieldDefs)}\" has an error.");
+                return null;
+            }
+        }
+        #endregion
+
+        #region Public Methods
+        public QlikSessionObject GetSelections(string filterText)
+        {
+            try
+            {
+                var listbox = GetFieldDefs(filterText).FirstOrDefault() ?? null;
+                if (listbox != null)
+                {
+                    logger.Info($"The master element \"{filterText}\" was found.");
+                    return listbox;
+                }
+                else
+                {
+                    logger.Info($"The filter text \"{filterText}\" is not a master element.");
+                    return new QlikSessionObject(filterText, SenseApp);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The selection could not be created.", ex);
+            }
+        }
+
+        public List<QlikSessionObject> GetListboxList(List<string> filterTexts)
+        {
+            try
+            {
+                var results = new List<QlikSessionObject>();
                 foreach (var text in filterTexts)
                 {
                     var listboxes = GetFieldDefs(text);
@@ -77,17 +154,26 @@ namespace q2gconhypercubeqvx.QlikApplication
                     }
                     else
                     {
-                        results.Add(new QlikListbox(text, SenseApp));
+                        results.Add(new QlikSessionObject(text, SenseApp));
                         logger.Info($"The filter text \"{text}\" is not a master element.");
                     }
                 }
 
                 return results;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("The selection could not be created.", ex);
             }
         }
+        #endregion
+    }
+
+    public class DimensionDataHelper
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public List<string> FieldDefs { get; set; }
+        public NxGrpType Grouping { get; set; }
     }
 }
