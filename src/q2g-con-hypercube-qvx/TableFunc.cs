@@ -118,7 +118,8 @@ namespace q2gconhypercubeqvx
                         logger.Debug($"read data - column count: {size.qcx}");
                         var counter = Convert.ToInt32(Math.Ceiling(Convert.ToDouble(size.qcy) / Convert.ToDouble(pageHeight)));
                         allPages = new List<IEnumerable<NxDataPage>>(counter);
-                        Parallel.For(0, counter, i =>
+                        var options = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                        Parallel.For(0, counter, options, i  =>
                         {
                             var initalPage = new NxPage { qTop = 0, qLeft = 0, qWidth = size.qcx, qHeight = pageHeight };
                             initalPage.qTop = i * pageHeight;
