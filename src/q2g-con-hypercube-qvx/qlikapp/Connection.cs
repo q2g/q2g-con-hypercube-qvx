@@ -1,4 +1,4 @@
-﻿namespace Q2G.ConnectorConnection
+﻿namespace q2gconhypercubeqvx.Connection
 {
     #region Usings
     using System;

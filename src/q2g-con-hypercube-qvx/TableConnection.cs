@@ -18,7 +18,7 @@ namespace q2gconhypercubeqvx
     using System.Text;
     using System.Threading;
     using NLog;
-    using Q2G.ConnectorConnection;
+    using q2gconhypercubeqvx.Connection;
     using QlikView.Qvx.QvxLibrary;
     #endregion
 
@@ -50,12 +50,12 @@ namespace q2gconhypercubeqvx
 
         private QvxTable GetData(ScriptCode script, ConnectorParameter parameter)
         {
-            Q2G.ConnectorConnection.Connection connection = null;
+            q2gconhypercubeqvx.Connection.Connection connection = null;
 
             try
             {
                 var config = QlikApp.CreateConfig(parameter, script.AppId);
-                var qlikApp = new QlikApp();
+                var qlikApp = new QlikApp(parameter);
                 connection = qlikApp.CreateNewConnection(config);
                 if(!connection.Connect())
                     return new QvxTable();

@@ -1,4 +1,4 @@
-﻿namespace Q2G.ConnectorConnection
+﻿namespace q2gconhypercubeqvx.Connection
 {
     #region Usings
     using System;
@@ -7,6 +7,8 @@
     using NLog;
     using Ser.Api;
     using Qlik.EngineAPI;
+    using q2gconhypercubeqvx;
+    using System.Threading;
     #endregion
 
     public class QlikApp
@@ -14,6 +16,18 @@
         #region Logger
         private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
+
+        public QlikApp(ConnectorParameter parameter)
+        {
+            var domainUser = new DomainUser(parameter.UserName);
+            if(domainUser == null)
+                throw new Exception("The user must a DomainUser like this UserDirectory\\UserId");
+
+            if (!WinAuth.ValidateWinCredentials(domainUser.UserId, parameter.Password))
+            {
+                throw new Exception("The windows credentials was not correct.");
+            }
+        }
 
         public static ConnectionConfig CreateConfig(ConnectorParameter parameter, string app = null)
         {
