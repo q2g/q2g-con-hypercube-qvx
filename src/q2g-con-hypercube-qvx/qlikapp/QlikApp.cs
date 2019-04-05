@@ -23,7 +23,7 @@
             if(domainUser == null)
                 throw new Exception("The user must a DomainUser like this UserDirectory\\UserId");
 
-            if (WinAuth.ValidateWinCredentials(domainUser.UserId, parameter.Password))
+            if (!WinAuth.ValidateWinCredentials(domainUser.UserId, parameter.Password))
             {
                 throw new Exception("The windows credentials was not correct.");
             }
