@@ -200,6 +200,8 @@ namespace q2gconhypercubeqvx
         {
             try
             {
+                Thread.Sleep(10000);
+
                 QvDataContractResponse response;
                 var parameter = ConnectorParameter.Create(connection?.MParameters);
                 logger.Trace($"HandleJsonRequest {method}");
