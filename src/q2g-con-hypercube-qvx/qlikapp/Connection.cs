@@ -15,7 +15,6 @@
     using Qlik.EngineAPI;
     using ImpromptuInterface;
     using Q2g.HelperPem;
-    using Ser.Api;
     using System.Net.Security;
     using System.Net.Http;
     #endregion

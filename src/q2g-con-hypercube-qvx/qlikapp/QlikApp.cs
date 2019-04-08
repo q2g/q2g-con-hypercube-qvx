@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using NLog;
-    using Ser.Api;
     using Qlik.EngineAPI;
     using q2gconhypercubeqvx;
     using System.Threading;
@@ -43,7 +42,7 @@
             {
                 ServerUri = uri,
                 App = app ?? "engineData",
-                Credentials = new SerCredentials()
+                Credentials = new ConnCredentials()
                 {
                     Type = QlikCredentialType.CERTIFICATE,
                     Value = parameter.UserName,
