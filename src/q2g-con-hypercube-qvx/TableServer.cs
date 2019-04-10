@@ -71,8 +71,6 @@ namespace q2gconhypercubeqvx
             {
                 try
                 {
-                    Thread.Sleep(10000);
-
                     var config = QlikApp.CreateConfig(parameter, appName);
                     var qlikApp = new QlikApp(parameter);
                     var appId = qlikApp.GetAllApps(config).FirstOrDefault(a => a.qDocName == appName).qDocId;

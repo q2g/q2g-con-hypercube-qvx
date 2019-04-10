@@ -245,7 +245,6 @@
                     else
                         appName = GetAppId(global);
                     logger.Debug($"Connect with app name: {appName}");
-                    var jj = global.GetDocListAsync().Result;
                     CurrentApp = global.OpenDocAsync(appName).Result;
                 }
                 logger.Debug("The Connection to Qlik was successfully");
