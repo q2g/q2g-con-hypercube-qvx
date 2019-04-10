@@ -12,6 +12,7 @@ namespace q2gconhypercubeqvx
     #region Usings
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using Newtonsoft.Json.Linq;
     using NLog;
@@ -49,7 +50,8 @@ namespace q2gconhypercubeqvx
                 var config = QlikApp.CreateConfig(parameter);
                 var qlikApp = new QlikApp(parameter);
                 var apps = qlikApp.GetAllApps(config);
-                foreach (var app in apps)
+                var appNames = apps.Select(s => s.qDocName).ToList();
+                foreach (var app in appNames)
                     databaseList.Add(new QlikView.Qvx.QvxLibrary.Database() { qName = app });
                 return new QvDataContractDatabaseListResponse { qDatabases = databaseList.ToArray() };
             }
@@ -60,7 +62,7 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetTables(ConnectorParameter parameter, string appId)
+        private QvDataContractResponse GetTables(ConnectorParameter parameter, string appName)
         {
             var tables = new List<QvxTable>();
             q2gconhypercubeqvx.Connection.Connection connection = null;
@@ -69,8 +71,12 @@ namespace q2gconhypercubeqvx
             {
                 try
                 {
-                    var config = QlikApp.CreateConfig(parameter, appId);
+                    Thread.Sleep(10000);
+
+                    var config = QlikApp.CreateConfig(parameter, appName);
                     var qlikApp = new QlikApp(parameter);
+                    var appId = qlikApp.GetAllApps(config).FirstOrDefault(a => a.qDocName == appName).qDocId;
+                    config = QlikApp.CreateConfig(parameter, appId);
                     connection = qlikApp.CreateNewConnection(config);
 
                     var options = new NxGetObjectOptions() { qTypes = new List<string> { "table" } };
@@ -96,7 +102,7 @@ namespace q2gconhypercubeqvx
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, $"tables form app {appId} not loaded.");
+                    logger.Error(ex, $"tables form app {appName} not loaded.");
                     return new QvDataContractTableListResponse { qTables = tables };
                 }
                 finally

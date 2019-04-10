@@ -50,7 +50,7 @@
             };
         }
 
-        public List<string> GetAllApps(ConnectionConfig config)
+        public List<DocListEntry> GetAllApps(ConnectionConfig config)
         {
             Connection conn = null;
 
@@ -60,14 +60,14 @@
                 var global = conn.GetGlobelContext();
                 var apps = global.GetDocListAsync().Result;
                 if (apps == null)
-                    return new List<string>();
+                    return new List<DocListEntry>();
                 else
-                    return apps.Select(s => s.qDocName).ToList();
+                    return apps;
             }
             catch (Exception ex)
             {
                 logger.Error(ex, $"The method {nameof(GetAllApps)} failed.");
-                return new List<string>();
+                return new List<DocListEntry>();
             }
             finally
             {
