@@ -1,4 +1,4 @@
-﻿namespace SSEDemo
+﻿namespace q2gconhypercubegrpc
 {
     #region Usings
     using NLog;

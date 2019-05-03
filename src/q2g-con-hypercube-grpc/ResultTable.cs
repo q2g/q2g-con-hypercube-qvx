@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SSEDemo
+﻿namespace q2gconhypercubegrpc
 {
+    #region Usings
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    #endregion
+
     public enum DataType
     {
         TEXT,

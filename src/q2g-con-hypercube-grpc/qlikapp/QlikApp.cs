@@ -1,4 +1,4 @@
-﻿namespace SSEDemo.Connection
+﻿namespace q2gconhypercubegrpc.Connection
 {
     #region Usings
     using System;
