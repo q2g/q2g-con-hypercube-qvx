@@ -5,7 +5,7 @@
     using Grpc.Core;
     using NLog;
     using Qlik.Connect;
-    using SSEDemo.Connection;
+    using q2gconhypercubegrpc.Connection;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -44,7 +44,7 @@
 
         private ResultTable GetData(ScriptCode script, UserParameter parameter)
         {
-            SSEDemo.Connection.Connection connection = null;
+            q2gconhypercubegrpc.Connection.Connection connection = null;
 
             try
             {
