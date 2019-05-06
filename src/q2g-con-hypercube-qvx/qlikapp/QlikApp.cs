@@ -18,6 +18,9 @@
 
         public QlikApp(ConnectorParameter parameter)
         {
+            if (parameter.UseDesktop)
+                return;
+
             var domainUser = new DomainUser(parameter.UserName);
             if(domainUser == null)
                 throw new Exception("The user must a DomainUser like this UserDirectory\\UserId");
@@ -38,16 +41,22 @@
             if (!parameter.UseDesktop)
                 uri = new Uri($"wss://{host}:4747");
 
-            return new ConnectionConfig()
+            var result = new ConnectionConfig()
             {
                 ServerUri = uri,
-                App = app ?? "engineData",
-                Credentials = new ConnCredentials()
+                App = app ?? "engineData"
+            };
+
+            if (!parameter.UseDesktop)
+            {
+                result.Credentials = new ConnCredentials()
                 {
                     Type = QlikCredentialType.CERTIFICATE,
                     Value = parameter.UserName,
-                }
-            };
+                };
+            }
+
+            return result;
         }
 
         public List<DocListEntry> GetAllApps(ConnectionConfig config)
