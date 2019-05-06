@@ -62,7 +62,7 @@
                 sb.AppendLine(",\"Inventory Turns\"");
                 sb.AppendLine(",\"Inventory Amount\"");
                 sb.AppendLine(",\"Margin % \"");
-                sb.AppendLine("FROM[Executive Dashboard Entwickler.qvf].[JZMrdb];");
+                sb.AppendLine("FROM [Executive Dashboard Entwickler.qvf].[JZMrdb];");
                 
                 Console.WriteLine($"Start Script...");
                 app.SetScriptAsync(sb.ToString()).Wait();

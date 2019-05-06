@@ -36,20 +36,23 @@
             if (!String.IsNullOrEmpty(parameter.ConnectUri))
                 host = parameter.ConnectUri;
 
-            var uri = new Uri("ws://localhost:4848");
+            //localhost:4848
+            var uri = new Uri("ws://172.30.1.125:9076");
             if (!parameter.UseDesktop)
                 uri = new Uri($"wss://{host}:4747");
 
-            return new ConnectionConfig()
+            var result = new ConnectionConfig()
             {
                 ServerUri = uri,
                 App = app ?? "engineData",
-                Credentials = new ConnCredentials()
-                {
-                    Type = QlikCredentialType.CERTIFICATE,
-                    Value = parameter.UserName,
-                }
             };
+
+            if(!parameter.UseDesktop)
+            {
+                result.Credentials.Type = QlikCredentialType.CERTIFICATE;
+                result.Credentials.Value = parameter.UserName;
+            }
+            return result;
         }
 
         public List<DocListEntry> GetAllApps(ConnectionConfig config)

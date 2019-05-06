@@ -31,6 +31,7 @@
         public SseEvaluator()
         {
             ServicePointManager.ServerCertificateValidationCallback += ValidateRemoteCertificate;
+            tableFunctions = new TableFunc();
         }
         #endregion
 
@@ -48,10 +49,10 @@
 
             try
             {
-                var config = QlikApp.CreateConfig(parameter, script.AppId);
+                var config = QlikApp.CreateConfig(parameter, $"/apps/{script.AppId}");
                 var qlikApp = new QlikApp(parameter);
                 connection = qlikApp.CreateNewConnection(config);
-                if (!connection.Connect())
+                if (connection == null)
                     return null;
 
                 foreach (var filter in script.Filter)
