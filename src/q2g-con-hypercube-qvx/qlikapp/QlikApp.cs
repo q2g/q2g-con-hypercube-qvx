@@ -18,6 +18,9 @@
 
         public QlikApp(ConnectorParameter parameter)
         {
+            if (parameter.UseDesktop)
+                return;
+
             var domainUser = new DomainUser(parameter.UserName);
             if(domainUser == null)
                 throw new Exception("The user must a DomainUser like this UserDirectory\\UserId");
@@ -38,19 +41,25 @@
             if (!parameter.UseDesktop)
                 uri = new Uri($"wss://{host}:4747");
 
-            return new ConnectionConfig()
+            var result = new ConnectionConfig()
             {
                 ServerUri = uri,
-                App = app ?? "engineData",
-                Credentials = new ConnCredentials()
+                App = app ?? "engineData"
+            };
+
+            if (!parameter.UseDesktop)
+            {
+                result.Credentials = new ConnCredentials()
                 {
                     Type = QlikCredentialType.CERTIFICATE,
                     Value = parameter.UserName,
-                }
-            };
+                };
+            }
+
+            return result;
         }
 
-        public List<string> GetAllApps(ConnectionConfig config)
+        public List<DocListEntry> GetAllApps(ConnectionConfig config)
         {
             Connection conn = null;
 
@@ -60,14 +69,14 @@
                 var global = conn.GetGlobelContext();
                 var apps = global.GetDocListAsync().Result;
                 if (apps == null)
-                    return new List<string>();
+                    return new List<DocListEntry>();
                 else
-                    return apps.Select(s => s.qDocName).ToList();
+                    return apps;
             }
             catch (Exception ex)
             {
                 logger.Error(ex, $"The method {nameof(GetAllApps)} failed.");
-                return new List<string>();
+                return new List<DocListEntry>();
             }
             finally
             {

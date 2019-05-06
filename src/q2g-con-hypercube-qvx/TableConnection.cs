@@ -57,7 +57,7 @@ namespace q2gconhypercubeqvx
                 var config = QlikApp.CreateConfig(parameter, script.AppId);
                 var qlikApp = new QlikApp(parameter);
                 connection = qlikApp.CreateNewConnection(config);
-                if(!connection.Connect())
+                if(connection == null)
                     return new QvxTable();
 
                 foreach (var filter in script.Filter)
