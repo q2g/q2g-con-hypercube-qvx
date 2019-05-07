@@ -15,7 +15,7 @@
         #endregion
 
         #region Properties
-        public string ConnectUri { get; set; } = "localhost";
+        public string ConnectUri { get; set; } = "ws://localhost:4848";
         public string UserName { get; set; } = String.Empty;
         public string Password { get; set; } = String.Empty;
         public bool UseDesktop { get; set; } = true;
@@ -33,7 +33,7 @@
                         result.UserName = item.Split('=').ElementAtOrDefault(1) ?? String.Empty;
                     if (item.ToLowerInvariant().StartsWith("password"))
                         result.Password = item.Split('=').ElementAtOrDefault(1) ?? String.Empty;
-                    if (item.ToLowerInvariant().StartsWith("host"))
+                    if (item.ToLowerInvariant().StartsWith("url"))
                         result.ConnectUri = item.Split('=').ElementAtOrDefault(1) ?? String.Empty;
                     if (item.ToLowerInvariant().StartsWith("isdesktop"))
                         result.UseDesktop = Convert.ToBoolean(item.Split('=').ElementAtOrDefault(1).ToLowerInvariant());

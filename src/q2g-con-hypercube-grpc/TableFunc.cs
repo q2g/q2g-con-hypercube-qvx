@@ -69,7 +69,6 @@
                     Name = tableName,
                 };
 
-                IEnumerable<int> columnOrder = null;
                 var fields = new List<ResultHeader>();
                 var rows = new List<ResultRow>();
                 var size = new Size();
@@ -84,9 +83,16 @@
 
                 dynamic hyperCubeLayout = tableObject.GetLayoutAsync<JObject>().Result;
                 HyperCube hyperCube = hyperCubeLayout.qHyperCube.ToObject<HyperCube>();
-                columnOrder = hyperCube.qColumnOrder;
+                var columnOrder = hyperCube.qColumnOrder.ToList();
                 size = hyperCube.qSize;
                 fields.AddRange(GetHyperCubeFields(hyperCube.qDimensionInfo, hyperCube.qMeasureInfo, script));
+
+                if (columnOrder == null || columnOrder.Count == 0)
+                {
+                    columnOrder = new List<int>();
+                    for (int i = 0; i < fields.Count; i++)
+                        columnOrder.Add(i);
+                }
 
                 var preview = new PreviewResponse()
                 {
@@ -137,6 +143,8 @@
                                 {
                                     var field = fields[order];
                                     row.Value = matrix[order].qText;
+                                    row.Num = matrix[order]?.qNum ?? Double.NaN;
+                                    row.Header = field.Name;
                                     if (!preview.qPreview.Any(s => s.qValues.Contains(field.Name)))
                                         hrow.qValues.Add(field.Name);
                                     if (preview.qPreview.Count <= preview.MaxCount)

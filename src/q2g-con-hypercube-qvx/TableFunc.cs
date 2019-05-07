@@ -83,7 +83,6 @@ namespace q2gconhypercubeqvx
                     TableName = tableName,
                 };
 
-                IEnumerable<int> columnOrder = null;
                 var fields = new List<QvxField>();
                 var rows = new List<QvxDataRow>();
                 var size = new Size();
@@ -98,9 +97,16 @@ namespace q2gconhypercubeqvx
 
                 dynamic hyperCubeLayout = tableObject.GetLayoutAsync<JObject>().Result;
                 HyperCube hyperCube = hyperCubeLayout.qHyperCube.ToObject<HyperCube>();
-                columnOrder = hyperCube.qColumnOrder;
+                var columnOrder = hyperCube.qColumnOrder.ToList();
                 size = hyperCube.qSize;
                 fields.AddRange(GetHyperCubeFields(hyperCube.qDimensionInfo, hyperCube.qMeasureInfo, script));
+
+                if (columnOrder == null || columnOrder.Count == 0)
+                {
+                    columnOrder = new List<int>();
+                    for (int i = 0; i < fields.Count; i++)
+                        columnOrder.Add(i);
+                }
 
                 var preview = new PreviewResponse()
                 {

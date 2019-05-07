@@ -50,22 +50,36 @@
                 {
                     qType = "testconnector",
                     qName = "testconn",
-                    qConnectionString = $"CUSTOM CONNECT TO \"provider=testconnector;userid={userid};password={password};host=localhost;\""
+                    qConnectionString = $"CUSTOM CONNECT TO \"provider=testconnector;userid={userid};password={password};url=ws://172.30.1.125:9076;\""
                 };
-                Console.WriteLine($"Create connection2...");
+                Console.WriteLine($"Create connection...");
                 var connection = app.CreateConnectionAsync(connConfig).Result;
                 Console.WriteLine($"Connection: {connection}");
 
+                connConfig = new Connection()
+                {
+                    qType = "folder",
+                    qName = "writefolder",
+                    qConnectionString = "/apps"
+                };
+                Console.WriteLine($"Create connection...");
+                var folderConnection = app.CreateConnectionAsync(connConfig).Result;
+                Console.WriteLine($"FolderConnection: {folderConnection}");
+
+
                 var sb = new StringBuilder();
-                sb.Append("\nLIB CONNECT TO 'testconn';");
+                sb.Append("\nLIB CONNECT TO 'testconn';\n");
+                sb.AppendLine("TestTable:");
                 sb.AppendLine("SQL SELECT \"Product\"");
                 sb.AppendLine(",\"Inventory Turns\"");
                 sb.AppendLine(",\"Inventory Amount\"");
                 sb.AppendLine(",\"Margin % \"");
                 sb.AppendLine("FROM [Executive Dashboard Entwickler.qvf].[JZMrdb];");
-                
+                sb.AppendLine("\nStore TestTable into [lib://writefolder/testcsv12.csv] (TXT);");
+
                 Console.WriteLine($"Start Script...");
-                app.SetScriptAsync(sb.ToString()).Wait();
+                var script = sb.ToString();
+                app.SetScriptAsync(script).Wait();
                 app.DoReloadAsync().Wait();
 
                 Console.WriteLine($"Show Table...");

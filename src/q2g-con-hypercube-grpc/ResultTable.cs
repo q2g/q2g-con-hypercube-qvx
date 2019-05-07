@@ -16,14 +16,16 @@
 
     public class ResultTable
     {
-        public string Name { get; set;}
+        public string Name { get; set; }
         public List<ResultHeader> Headers { get; set; } = new List<ResultHeader>();
         public List<ResultRow> Rows { get; set; } = new List<ResultRow>();
     }
 
     public class ResultRow
     {
-        public object Value { get; set; }
+        public string Value { get; set; }
+        public double Num { get; set; }
+        public string Header { get; set; }
     }
 
     public class ResultHeader

@@ -84,22 +84,41 @@
             }
         }
 
-        private DataChunk BuildDataChunk(string value)
+        private DataChunk GetDataChunk(ResultTable table)
         {
-            var dataChunk = new DataChunk();
-            if (value == null)
+            try
             {
-                dataChunk.StringBucket.Add(value);
-                dataChunk.StringCodes.Add(-1);
-                dataChunk.NumberCodes.Add(-1);
+                var chunkIndex = -1;
+                var rowChunk = new DataChunk();
+                foreach (var header in table.Headers)
+                {
+                    foreach (var row in table.Rows)
+                    {
+                        chunkIndex++;
+                        if (chunkIndex > 0)
+                            rowChunk = new DataChunk(rowChunk);
+
+                        if (row.Value == null)
+                        {
+                            rowChunk.StringBucket.Add(row.Value);
+                            rowChunk.StringCodes.Add(-1);
+                            rowChunk.NumberCodes.Add(-1);
+                        }
+                        else
+                        {
+                            rowChunk.StringBucket.Add(row.Value);
+                            rowChunk.StringCodes.Add(row.Value.Length - 1);
+                            rowChunk.NumberCodes.Add(-1);
+                        }
+                    }
+                }
+                return rowChunk;
             }
-            else
+            catch (Exception ex)
             {
-                dataChunk.StringBucket.Add(value);
-                dataChunk.StringCodes.Add(value.Length - 1);
-                dataChunk.NumberCodes.Add(-1);
+                logger.Error(ex, "No Datachunks build from table.");
+                return new DataChunk();
             }
-            return dataChunk;
         }
 
         #endregion
@@ -111,11 +130,6 @@
             {
                 try
                 {
-                    var metaResponse = GetDataResponseInfo();
-                    var metaData = new Metadata();
-                    metaData.Add("x-qlik-getdata-bin", metaResponse.ToByteArray());
-                    context.WriteResponseHeadersAsync(metaData).Wait();
-
                     var query = request?.Parameters?.Statement ?? null;
                     logger.Debug($"Parse query {query}");
                     var script = ScriptCode.Parse(query);
@@ -123,21 +137,26 @@
                         throw new Exception("The sql script is not valid.");
 
                     var userParameter = UserParameter.Create(request.Connection.ConnectionString);
-                    var qvxTable = GetData(script, userParameter);
-                    //var result = new QvxDataTable(qvxTable);
-                    //result.Select(qvxTable.Fields);
-                    logger.Debug($"Send result table {qvxTable.Name}");
-                    //return result;
+                    var resultTable = GetData(script, userParameter);
+                    logger.Debug($"Send result table {resultTable.Name}");
 
-                    var dataChunk = BuildDataChunk("Hallo Welt");
+                    //Write meta table
+                    var metaResponse = GetDataResponseInfo(resultTable);
+                    var metaData = new Metadata();
+                    metaData.Add("x-qlik-getdata-bin", metaResponse.ToByteArray());
+                    context.WriteResponseHeadersAsync(metaData).Wait();
+
+                    //Write data
+                    var dataChunk = GetDataChunk(resultTable);
                     responseStream.WriteAsync(dataChunk);
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex, "The query could not be executed.");
                     LogManager.Flush();
-                    responseStream.WriteAsync(new DataChunk());
-                    //return new QvxDataTable(new QvxTable() { TableName = "Error" });
+                    var errorChunk = new DataChunk();
+                    errorChunk.StringCodes.Add(-1);
+                    responseStream.WriteAsync(errorChunk);
                 }
             });
         }
@@ -154,21 +173,24 @@
             return Task.FromResult<MetaInfo>(metaInfo);
         }
 
-        public GetDataResponse GetDataResponseInfo()
+        public GetDataResponse GetDataResponseInfo(ResultTable table)
         {
             var dataResponse = new GetDataResponse()
             {
-                TableName = "TestName",
+                TableName = table.Name,
             };
-            dataResponse.FieldInfo.Add(new FieldInfo()
+            foreach (var header in table.Headers)
             {
-                Name = "test1",
-                SemanticType = SemanticType.Default,
-                FieldAttributes = new FieldAttributes()
+                dataResponse.FieldInfo.Add(new FieldInfo()
                 {
-                    Type = FieldAttrType.Text
-                }
-            });
+                    Name = header.Name,
+                    SemanticType = SemanticType.Default,
+                    FieldAttributes = new FieldAttributes()
+                    {
+                        Type = FieldAttrType.Text
+                    }
+                });
+            }
             return dataResponse;
         }
 
