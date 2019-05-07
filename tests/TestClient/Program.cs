@@ -75,7 +75,7 @@
                 sb.AppendLine(",\"Inventory Amount\"");
                 sb.AppendLine(",\"Margin % \"");
                 sb.AppendLine("FROM [Executive Dashboard Entwickler.qvf].[JZMrdb];");
-                sb.AppendLine("\nStore TestTable into [lib://writefolder/testcsv12.csv] (TXT);");
+                sb.AppendLine("\nStore TestTable into [lib://writefolder/table.csv] (TXT);");
 
                 Console.WriteLine($"Start Script...");
                 var script = sb.ToString();
