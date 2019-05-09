@@ -134,13 +134,14 @@
                         var allMatrix = page?.SelectMany(p => p.qMatrix);
                         foreach (var matrix in allMatrix)
                         {
-                            var row = new ResultRow();
-                            var hrow = new PreviewRow();
-                            var drow = new PreviewRow();
                             foreach (var order in columnOrder)
                             {
                                 if (order < fields.Count)
                                 {
+                                    var row = new ResultRow();
+                                    var hrow = new PreviewRow();
+                                    var drow = new PreviewRow();
+
                                     var field = fields[order];
                                     row.Value = matrix[order].qText;
                                     row.Num = matrix[order]?.qNum ?? Double.NaN;
@@ -149,13 +150,14 @@
                                         hrow.qValues.Add(field.Name);
                                     if (preview.qPreview.Count <= preview.MaxCount)
                                         drow.qValues.Add(matrix[order].qText);
+
+                                    rows.Add(row);
+                                    if (hrow.qValues.Count > 0)
+                                        preview.qPreview.Add(hrow);
+                                    if (drow.qValues.Count > 0)
+                                        preview.qPreview.Add(drow);
                                 }
-                            }
-                            rows.Add(row);
-                            if (hrow.qValues.Count > 0)
-                                preview.qPreview.Add(hrow);
-                            if (drow.qValues.Count > 0)
-                                preview.qPreview.Add(drow);
+                            } 
                         }
                     }
                 }

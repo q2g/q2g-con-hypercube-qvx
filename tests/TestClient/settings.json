@@ -1,0 +1,19 @@
+{
+  "ServerUri": "ws://172.30.1.125:9076/app/engineData",
+  "App": "/apps/Executive Dashboard Entwickler.qvf",
+  "Scripts": [
+    "ScriptExample1.txt"
+  ],
+  "Connections": [
+    {
+      "Type": "testconnector",
+      "Name": "testconn",
+      "ConnectionString": "CUSTOM CONNECT TO \"provider=testconnector;userid=test;password=test;url=ws://172.30.1.125:9076;\""
+    },
+    {
+      "Type": "folder",
+      "Name": "writefolder",
+      "ConnectionString": "/apps"
+    }
+  ]
+}

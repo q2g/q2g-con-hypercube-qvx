@@ -3,8 +3,11 @@
     #region Usings
     using enigma;
     using ImpromptuInterface;
+    using Newtonsoft.Json;
     using Qlik.EngineAPI;
     using System;
+    using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Net.Security;
@@ -19,6 +22,10 @@
         static void Main(string[] args)
         {
             Console.WriteLine("Starting...");
+            Console.WriteLine("Read Settings...");
+
+            var content = File.ReadAllText("settings.json");
+            var settings = JsonConvert.DeserializeObject<Settings>(content);
 
             Session session = null;
             IDoc app = null;
@@ -26,7 +33,7 @@
             {
                 var config = new EnigmaConfigurations()
                 {
-                    Url = $"ws://172.30.1.125:9076/app/engineData",
+                    Url = settings.ServerUri.AbsoluteUri,
                     CreateSocket = async (url) =>
                     {
                         var ws = new ClientWebSocket();
@@ -39,68 +46,39 @@
                 var globalTask = session.OpenAsync();
                 globalTask.Wait();
                 IGlobal global = Impromptu.ActLike<IGlobal>(globalTask.Result);
-                var appName = "/apps/Executive Dashboard Entwickler.qvf";
+                var appName = settings.App;
                 Console.WriteLine($"Connect to App {appName}...");
                 app = global.OpenDocAsync(appName).Result;
 
-                var userid = "test";
-                var password = "test";
-
-                var connConfig = new Connection()
+                Console.WriteLine($"Create Connections...");
+                foreach (var qconn in settings.Connections)
                 {
-                    qType = "testconnector",
-                    qName = "testconn",
-                    qConnectionString = $"CUSTOM CONNECT TO \"provider=testconnector;userid={userid};password={password};url=ws://172.30.1.125:9076;\""
-                };
-                Console.WriteLine($"Create connection...");
-                var connection = app.CreateConnectionAsync(connConfig).Result;
-                Console.WriteLine($"Connection: {connection}");
-
-                connConfig = new Connection()
-                {
-                    qType = "folder",
-                    qName = "writefolder",
-                    qConnectionString = "/apps"
-                };
-                Console.WriteLine($"Create connection...");
-                var folderConnection = app.CreateConnectionAsync(connConfig).Result;
-                Console.WriteLine($"FolderConnection: {folderConnection}");
-
-
-                var sb = new StringBuilder();
-                sb.Append("\nLIB CONNECT TO 'testconn';\n");
-                sb.AppendLine("TestTable:");
-                sb.AppendLine("SQL SELECT \"Product\"");
-                sb.AppendLine(",\"Inventory Turns\"");
-                sb.AppendLine(",\"Inventory Amount\"");
-                sb.AppendLine(",\"Margin % \"");
-                sb.AppendLine("FROM [Executive Dashboard Entwickler.qvf].[JZMrdb];");
-                sb.AppendLine("\nStore TestTable into [lib://writefolder/table.csv] (TXT);");
-
-                Console.WriteLine($"Start Script...");
-                var script = sb.ToString();
-                app.SetScriptAsync(script).Wait();
-                app.DoReloadAsync().Wait();
-
-                Console.WriteLine($"Show Table...");
-                var size = new Qlik.EngineAPI.Size();
-                var tables = app.GetTablesAndKeysAsync(size, size, 0, false, false).Result;
-
-                var table = tables.qtr.FirstOrDefault() ?? null;
-                if(table != null)
-                {
-                    var tableSb = new StringBuilder();
-                    tableSb.Append($"TableName: {table.qName}\n");
-                    foreach (var field in table.qFields)
-                        tableSb.AppendLine($"Field: {field.qName}");
-                    tableSb.AppendLine($"Number of Rows: {table.qNoOfRows}");
-                    Console.WriteLine($"Table:\n{tableSb.ToString()}");
+                    try
+                    {
+                        var connConfig = new Connection()
+                        {
+                            qType = qconn.Type,
+                            qName = qconn.Name,
+                            qConnectionString = qconn.ConnectionString
+                        };
+                        Console.WriteLine($"Create connection...");
+                        var test = app.CreateConnectionAsync(connConfig).Result;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"No Connection created: {ex.ToString()}");
+                    }
                 }
-                else
-                    Console.WriteLine($"No Table found...");
 
-                Console.WriteLine($"Bereit...");
-                Console.ReadLine();
+                foreach (var scriptPath in settings.Scripts)
+                {
+                    var scriptContent = File.ReadAllText(scriptPath);
+                    Console.WriteLine($"Reload Script...");
+                    app.SetScriptAsync(scriptContent).Wait();
+                    app.DoReloadAsync().Wait();
+                }
+
+                Console.WriteLine($"Finish.");
             }
             catch (Exception ex)
             {

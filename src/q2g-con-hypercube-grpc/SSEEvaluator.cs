@@ -49,7 +49,7 @@
 
             try
             {
-                var config = QlikApp.CreateConfig(parameter, $"/apps/{script.AppId}");
+                var config = QlikApp.CreateConfig(parameter, script.AppId);
                 var qlikApp = new QlikApp(parameter);
                 connection = qlikApp.CreateNewConnection(config);
                 if (connection == null)
@@ -97,7 +97,6 @@
                         chunkIndex++;
                         if (chunkIndex > 0)
                             rowChunk = new DataChunk(rowChunk);
-
                         if (row.Value == null)
                         {
                             rowChunk.StringBucket.Add(row.Value);
@@ -107,7 +106,7 @@
                         else
                         {
                             rowChunk.StringBucket.Add(row.Value);
-                            rowChunk.StringCodes.Add(row.Value.Length - 1);
+                            rowChunk.StringCodes.Add(chunkIndex);
                             rowChunk.NumberCodes.Add(-1);
                         }
                     }

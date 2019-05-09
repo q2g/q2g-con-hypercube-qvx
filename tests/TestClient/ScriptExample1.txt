@@ -1,0 +1,7 @@
+﻿LIB CONNECT TO 'testconn';
+TestTable:
+SQL SELECT "Customer"
+    ,"Expense Amount"
+    ,"Revenue"
+FROM [/apps/Executive Dashboard Entwickler.qvf].[pDKRhr];
+Store TestTable into [lib://writefolder/table.csv] (TXT);
