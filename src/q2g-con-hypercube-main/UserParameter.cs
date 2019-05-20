@@ -61,6 +61,10 @@
             isDesktop = isDesktop ?? "true";
             user = user ?? "";
             password = password ?? "";
+
+            if (host == "localhost" && isDesktop == "true")
+                host = "ws://localhost:4848";
+
             return new UserParameter()
             {
                 UseDesktop = Boolean.Parse(isDesktop.ToLowerInvariant()),

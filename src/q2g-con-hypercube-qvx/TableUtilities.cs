@@ -27,6 +27,8 @@ namespace q2gconhypercubeqvx
                 newRow[field] = row.Value;
                 rows.Add(newRow);
             }
+            resultTable.Fields = fields.ToArray();
+            resultTable.GetRows = () => { return rows; };
             return resultTable;
         }
     }

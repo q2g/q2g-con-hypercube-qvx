@@ -39,10 +39,13 @@
                 App = app ?? "engineData",
             };
 
-            if(!parameter.UseDesktop)
+            if (!parameter.UseDesktop)
             {
-                result.Credentials.Type = QlikCredentialType.CERTIFICATE;
-                result.Credentials.Value = parameter.UserName;
+                result.Credentials = new ConnCredentials()
+                {
+                    Type = QlikCredentialType.CERTIFICATE,
+                    Value = parameter.UserName,
+                };
             }
             return result;
         }
