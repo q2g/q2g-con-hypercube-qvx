@@ -1,4 +1,4 @@
-﻿namespace q2gconhypercubegrpc
+﻿namespace q2gconhypercubemain
 {
     #region Usings
     using NLog;
@@ -45,6 +45,29 @@
                 logger.Error(ex, "Could not parse connection string.");
                 return null;
             }
+        }
+
+        public static UserParameter Create(Dictionary<string, string> MParameters)
+        {
+            string host = "";
+            string isDesktop = "true";
+            string user = "";
+            string password = "";
+            MParameters?.TryGetValue("host", out host);
+            MParameters?.TryGetValue("isDesktop", out isDesktop);
+            MParameters?.TryGetValue("UserId", out user);
+            MParameters?.TryGetValue("Password", out password);
+            host = host ?? "";
+            isDesktop = isDesktop ?? "true";
+            user = user ?? "";
+            password = password ?? "";
+            return new UserParameter()
+            {
+                UseDesktop = Boolean.Parse(isDesktop.ToLowerInvariant()),
+                ConnectUri = host,
+                Password = password,
+                UserName = user
+            };
         }
     }
 }

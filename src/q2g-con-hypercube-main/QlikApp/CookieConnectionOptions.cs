@@ -1,4 +1,4 @@
-﻿namespace q2gconhypercubeqvx.Connection
+﻿namespace q2gconhypercubemain
 {
     #region Usings
     using System;
@@ -7,7 +7,6 @@
     using System.Security.Cryptography.X509Certificates;
     using System.Security.Cryptography;
     using System.IO;
-    using Q2g.HelperPem;
     #endregion
 
     public class CookieConnectionOptions

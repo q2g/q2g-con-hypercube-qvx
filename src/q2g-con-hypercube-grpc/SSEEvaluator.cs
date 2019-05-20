@@ -5,7 +5,6 @@
     using Grpc.Core;
     using NLog;
     using Qlik.Connect;
-    using q2gconhypercubegrpc.Connection;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -15,6 +14,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using static Qlik.Connect.Connector;
+    using q2gconhypercubemain;
     #endregion
 
     public class SseEvaluator : ConnectorBase, IDisposable
@@ -45,7 +45,7 @@
 
         private ResultTable GetData(ScriptCode script, UserParameter parameter)
         {
-            q2gconhypercubegrpc.Connection.Connection connection = null;
+            q2gconhypercubemain.Connection connection = null;
 
             try
             {

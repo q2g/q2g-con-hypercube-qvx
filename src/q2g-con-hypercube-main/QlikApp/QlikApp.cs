@@ -1,4 +1,4 @@
-﻿namespace q2gconhypercubegrpc.Connection
+﻿namespace q2gconhypercubemain
 {
     #region Usings
     using System;

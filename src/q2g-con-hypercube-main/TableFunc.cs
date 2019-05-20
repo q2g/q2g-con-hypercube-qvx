@@ -1,4 +1,4 @@
-﻿namespace q2gconhypercubegrpc
+﻿namespace q2gconhypercubemain
 {
     #region Usings
     using System;
@@ -157,7 +157,7 @@
                                     if (drow.qValues.Count > 0)
                                         preview.qPreview.Add(drow);
                                 }
-                            } 
+                            }
                         }
                     }
                 }
@@ -178,14 +178,14 @@
         #region helper classes
         public class TableHelper
         {
-            public TableHelper(ResultTable table, PreviewResponse preview)
+            public TableHelper(ResultTable table, IPreviewResponse preview)
             {
                 QvxTable = table;
                 Preview = preview;
             }
 
             public ResultTable QvxTable { get; private set; }
-            public PreviewResponse Preview { get; private set; }
+            public IPreviewResponse Preview { get; private set; }
         }
 
         public class PreviewRow
@@ -197,11 +197,17 @@
             }
         }
 
-        public class PreviewResponse
+        public interface IPreviewResponse
+        {
+            List<PreviewRow> qPreview { get; set; }
+            int MaxCount { get; set; }
+        }
+
+        public class PreviewResponse : IPreviewResponse
         {
             public List<PreviewRow> qPreview { get; set; }
             public int MaxCount { get; set; } = 15;
-            public PreviewResponse()
+            public PreviewResponse() : base()
             {
                 this.qPreview = new List<PreviewRow>();
             }

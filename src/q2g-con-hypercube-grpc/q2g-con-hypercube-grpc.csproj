@@ -7,20 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="enigma.net" Version="1.0.0" />
     <PackageReference Include="Google.Protobuf" Version="3.7.0" />
     <PackageReference Include="Grpc.Core" Version="1.19.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="NLog" Version="4.6.2" />
-    <PackageReference Include="Q2gHelperPem" Version="1.4.5" />
+    <PackageReference Include="NLog" Version="4.6.3" />
     <PackageReference Include="qlik-connectapi" Version="1.0.0" />
-    <PackageReference Include="qlik-engineapi" Version="0.3.0-alpha0015" />
-    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\q2g-con-hypercube-main\q2g-con-hypercube-main.csproj" />
   </ItemGroup>
 
   <ItemGroup>
