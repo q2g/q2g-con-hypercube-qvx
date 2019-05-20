@@ -2,10 +2,9 @@ version: "2"
 
 services:
 
-
-  sse-service:
+  dotnet-grpc-service:
     build: ./
-    image: serservice
+    image: dotnetservice
 
   engine:
     image: qlikcore/engine:12.387.0
@@ -14,7 +13,7 @@ services:
       - -S AcceptEULA=yes 
       - -S DocumentDirectory=/apps
       - -S EnableGrpcCustomConnectors=1
-      - -S GrpcConnectorPlugins="testconnector,sse-service:50053"
+      - -S GrpcConnectorPlugins="testconnector,dotnet-grpc-service:50053"
       - -S ScriptLogVerbosity=5 
       - -S SessionLogVerbosity=5
       - -S ScriptLogVerbosity=5 
@@ -27,4 +26,4 @@ services:
       - 9077:9076
 
     depends_on:
-      - sse-service
+      - dotnet-grpc-service
