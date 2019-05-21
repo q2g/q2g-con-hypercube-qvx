@@ -129,19 +129,23 @@
                     if (allPages == null)
                         throw new Exception($"no dimension in table {script.ObjectId} exits.");
                     logger.Debug($"read pages - count {allPages.Count}");
+
+                    var hrow = new PreviewRow();
+                    preview.qPreview.Add(hrow);
+
                     foreach (var page in allPages)
                     {
                         var allMatrix = page?.SelectMany(p => p.qMatrix);
                         foreach (var matrix in allMatrix)
                         {
+                            var drow = new PreviewRow();
+                            preview.qPreview.Add(drow);
+
                             foreach (var order in columnOrder)
                             {
                                 if (order < fields.Count)
                                 {
                                     var row = new ResultRow();
-                                    var hrow = new PreviewRow();
-                                    var drow = new PreviewRow();
-
                                     var field = fields[order];
                                     row.Value = matrix[order].qText;
                                     row.Num = matrix[order]?.qNum ?? Double.NaN;
@@ -158,12 +162,7 @@
                                     if (!preview.qPreview.Any(s => s.qValues.Contains(field.Name)))
                                         hrow.qValues.Add(field.Name);
                                     if (preview.qPreview.Count <= preview.MaxCount)
-                                        drow.qValues.Add(matrix[order].qText);
-
-                                    if (hrow.qValues.Count > 0)
-                                        preview.qPreview.Add(hrow);
-                                    if (drow.qValues.Count > 0)
-                                        preview.qPreview.Add(drow);
+                                        drow.qValues.Add(matrix[order].qText); 
                                 }
                             }
                         }

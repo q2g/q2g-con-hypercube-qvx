@@ -36,7 +36,7 @@ namespace q2gconhypercubeqvx
             catch (Exception ex)
             {
                 logger.Error(ex, "The preview result could not create.");
-                return null;
+                return new PreviewResponse();
             }
         }
     }

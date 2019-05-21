@@ -165,8 +165,6 @@ namespace q2gconhypercubeqvx
 
             try
             {
-                Thread.Sleep(10000);
-
                 var oId = GetObjectId(objectId);
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for preview table found.");
