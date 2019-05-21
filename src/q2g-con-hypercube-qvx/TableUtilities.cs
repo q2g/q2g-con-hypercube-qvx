@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace q2gconhypercubeqvx
@@ -20,13 +21,17 @@ namespace q2gconhypercubeqvx
             foreach (var header in table.Headers)
                 fields.Add(new QvxField(header.Name, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
             var rows = new List<QvxDataRow>();
+            QvxDataRow newRow = null;
             foreach (var row in table.Rows)
             {
-                var newRow = new QvxDataRow();
+                if (row.IsFirstRow)
+                    newRow = new QvxDataRow();
                 var field = fields.FirstOrDefault(f => f.FieldName == row.Header);
                 newRow[field] = row.Value;
-                rows.Add(newRow);
+                if (row.IsLastRow)
+                    rows.Add(newRow);
             }
+
             resultTable.Fields = fields.ToArray();
             resultTable.GetRows = () => { return rows; };
             return resultTable;

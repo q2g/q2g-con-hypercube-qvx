@@ -165,6 +165,8 @@ namespace q2gconhypercubeqvx
 
             try
             {
+                Thread.Sleep(10000);
+
                 var oId = GetObjectId(objectId);
                 if (String.IsNullOrEmpty(oId))
                     throw new Exception("no object id for preview table found.");
@@ -175,7 +177,7 @@ namespace q2gconhypercubeqvx
                 var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, connection.CurrentApp);
                 if (resultTable == null)
                     throw new Exception("no preview table found.");
-                return resultTable.Preview as PreviewResponse;
+                return PreviewResponse.Create(resultTable.Preview);
             }
             catch (Exception ex)
             {

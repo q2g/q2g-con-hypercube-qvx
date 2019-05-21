@@ -146,12 +146,20 @@
                                     row.Value = matrix[order].qText;
                                     row.Num = matrix[order]?.qNum ?? Double.NaN;
                                     row.Header = field.Name;
+
+                                    if (order == 0)
+                                        row.IsFirstRow = true;
+
+                                    if (order == fields.Count - 1)
+                                        row.IsLastRow = true;
+
+                                    rows.Add(row);
+
                                     if (!preview.qPreview.Any(s => s.qValues.Contains(field.Name)))
                                         hrow.qValues.Add(field.Name);
                                     if (preview.qPreview.Count <= preview.MaxCount)
                                         drow.qValues.Add(matrix[order].qText);
 
-                                    rows.Add(row);
                                     if (hrow.qValues.Count > 0)
                                         preview.qPreview.Add(hrow);
                                     if (drow.qValues.Count > 0)

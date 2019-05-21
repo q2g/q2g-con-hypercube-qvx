@@ -26,6 +26,8 @@
         public string Value { get; set; }
         public double Num { get; set; }
         public string Header { get; set; }
+        public bool IsLastRow { get; set; }
+        public bool IsFirstRow { get; set; }
     }
 
     public class ResultHeader
