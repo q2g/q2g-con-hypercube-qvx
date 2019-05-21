@@ -20,7 +20,7 @@
             try
             {
                 SetLoggerSettings("App.config");
-                logger.Info("SSE-DEMO");
+                logger.Info("GRPC-Demo-Connector");
 
                 var connector = new SseConnector();
                 connector.Start();
