@@ -1,6 +1,0 @@
-
-FROM microsoft/dotnet:2.2-runtime AS base
-WORKDIR /app
-COPY . .
-
-ENTRYPOINT ["dotnet", "q2g-con-hypercube-grpc.dll"]

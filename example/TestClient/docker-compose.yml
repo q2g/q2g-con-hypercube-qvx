@@ -3,7 +3,7 @@ version: "2"
 services:
 
   dotnet-grpc-service:
-    build: ./
+    build: ../../src/
     image: dotnetservice
 
   engine:
