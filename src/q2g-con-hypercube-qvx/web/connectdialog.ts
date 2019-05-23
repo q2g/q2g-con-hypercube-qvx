@@ -36,7 +36,7 @@ class ConnectDialog {
 
     private connectionString(host: string): string {
         if (!host || this.isDesktop)
-            host = "localhost";
+            host = "ws://localhost:4848";
 
         let conString = `CUSTOM CONNECT TO "provider=${this.provider};host=${host};isDesktop=${this.isDesktop};"`;
         return conString;

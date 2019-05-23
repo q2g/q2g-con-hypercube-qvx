@@ -1,4 +1,4 @@
-﻿namespace q2gconhypercubeqvx.Connection
+﻿namespace q2gconhypercubemain
 {
     #region Usings
     using System;
@@ -14,9 +14,8 @@
     using System.Threading;
     using Qlik.EngineAPI;
     using ImpromptuInterface;
-    using Q2g.HelperPem;
     using System.Net.Security;
-    using System.Net.Http;
+    using Q2g.HelperPem;
     #endregion
 
     #region Enumeration
@@ -50,13 +49,16 @@
         #region Constructor & Init
         public Connection(string identity, ConnectionConfig config)
         {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls |
-                                                   SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback += delegate (object sender, X509Certificate certificate,
-                                                                                 X509Chain chain,  SslPolicyErrors sslPolicyErrors)
+            if (config.ServerUri.Scheme.EndsWith("s"))
             {
-                return true; // **** Always accept
-            };
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls |
+                                                       SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback += delegate (object sender, X509Certificate certificate,
+                                                                                     X509Chain chain, SslPolicyErrors sslPolicyErrors)
+                {
+                    return true; // **** Always accept
+                };
+            }
 
             Mode = QlikAppMode.SERVER;
             IsSharedSession = true;

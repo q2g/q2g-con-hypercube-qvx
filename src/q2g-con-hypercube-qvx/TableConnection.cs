@@ -18,7 +18,7 @@ namespace q2gconhypercubeqvx
     using System.Text;
     using System.Threading;
     using NLog;
-    using q2gconhypercubeqvx.Connection;
+    using q2gconhypercubemain;
     using QlikView.Qvx.QvxLibrary;
     #endregion
 
@@ -48,17 +48,17 @@ namespace q2gconhypercubeqvx
             return code.Fields.IndexOf(field) > -1;
         }
 
-        private QvxTable GetData(ScriptCode script, ConnectorParameter parameter)
+        private ResultTable GetData(ScriptCode script, UserParameter parameter)
         {
-            q2gconhypercubeqvx.Connection.Connection connection = null;
+            q2gconhypercubemain.Connection connection = null;
 
             try
             {
                 var config = QlikApp.CreateConfig(parameter, script.AppId);
                 var qlikApp = new QlikApp(parameter);
                 connection = qlikApp.CreateNewConnection(config);
-                if(connection == null)
-                    return new QvxTable();
+                if (!connection.Connect())
+                    return null;
 
                 foreach (var filter in script.Filter)
                 {
@@ -81,7 +81,7 @@ namespace q2gconhypercubeqvx
             catch (Exception ex)
             {
                 logger.Error(ex, "The table script can not be executed.");
-                return new QvxTable();
+                return null;
             }
             finally
             {
@@ -100,8 +100,9 @@ namespace q2gconhypercubeqvx
                 if (script == null)
                     throw new Exception("The sql script is not valid.");
 
-                var parameter = ConnectorParameter.Create(MParameters);
-                var qvxTable = GetData(script, parameter);
+                var parameter = UserParameter.Create(MParameters);
+                var resultTable = GetData(script, parameter);
+                var qvxTable = TableUtilities.ConvertTable(resultTable);
                 var result = new QvxDataTable(qvxTable);
                 result.Select(qvxTable.Fields);
                 logger.Debug($"Send result table {qvxTable.TableName}");

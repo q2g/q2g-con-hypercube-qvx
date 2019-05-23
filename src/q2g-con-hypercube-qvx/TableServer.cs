@@ -13,10 +13,13 @@ namespace q2gconhypercubeqvx
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
+    using System.Net.Security;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using Newtonsoft.Json.Linq;
     using NLog;
-    using q2gconhypercubeqvx.Connection;
+    using q2gconhypercubemain;
     using Qlik.EngineAPI;
     using QlikView.Qvx.QvxLibrary;
     #endregion
@@ -31,6 +34,19 @@ namespace q2gconhypercubeqvx
         private TableFunc tableFunctions;
         #endregion
 
+        #region Constructor
+        public TableServer()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate (Object obj,
+                X509Certificate certificate,
+                X509Chain chain,
+                SslPolicyErrors errors)
+            {
+                return (true);
+            };
+        }
+        #endregion
+
         #region private methods
         private string GetObjectId(string value)
         {
@@ -42,7 +58,7 @@ namespace q2gconhypercubeqvx
             return null;
         }
 
-        private QvDataContractResponse GetDatabases(ConnectorParameter parameter)
+        private QvDataContractResponse GetDatabases(UserParameter parameter)
         {
             var databaseList = new List<QlikView.Qvx.QvxLibrary.Database>();
             try
@@ -62,10 +78,10 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetTables(ConnectorParameter parameter, string appName)
+        private QvDataContractResponse GetTables(UserParameter parameter, string appName)
         {
             var tables = new List<QvxTable>();
-            q2gconhypercubeqvx.Connection.Connection connection = null;
+            q2gconhypercubemain.Connection connection = null;
 
             using (MappedDiagnosticsLogicalContext.SetScoped("connectionId", connection?.ConnId))
             {
@@ -110,9 +126,9 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetFields(ConnectorParameter parameter, string appId, string objectId)
+        private QvDataContractResponse GetFields(UserParameter parameter, string appId, string objectId)
         {
-            q2gconhypercubeqvx.Connection.Connection connection = null;
+            q2gconhypercubemain.Connection connection = null;
 
             using (MappedDiagnosticsLogicalContext.SetScoped("connectionId", connection?.ConnId))
             {
@@ -128,7 +144,8 @@ namespace q2gconhypercubeqvx
                     var resultTable = tableFunctions.GetTableInfosFromApp("FieldTable", script, connection.CurrentApp);
                     if (resultTable == null)
                         throw new Exception("no field table found.");
-                    return new QvDataContractFieldListResponse { qFields = resultTable.QvxTable.Fields };
+                    var qvxTable = TableUtilities.ConvertTable(resultTable.QvxTable);
+                    return new QvDataContractFieldListResponse { qFields = qvxTable.Fields };
                 }
                 catch (Exception ex)
                 {
@@ -142,9 +159,9 @@ namespace q2gconhypercubeqvx
             }
         }
 
-        private QvDataContractResponse GetPreview(ConnectorParameter parameter, string appId, string objectId)
+        private QvDataContractResponse GetPreview(UserParameter parameter, string appId, string objectId)
         {
-            q2gconhypercubeqvx.Connection.Connection connection = null;
+            q2gconhypercubemain.Connection connection = null;
 
             try
             {
@@ -158,12 +175,12 @@ namespace q2gconhypercubeqvx
                 var resultTable = tableFunctions.GetTableInfosFromApp("PreviewTable", script, connection.CurrentApp);
                 if (resultTable == null)
                     throw new Exception("no preview table found.");
-                return resultTable.Preview;
+                return PreviewResponse.Create(resultTable.Preview);
             }
             catch (Exception ex)
             {
                 logger.Error(ex, $"fields from app {appId} and table {objectId} not loaded.");
-                return new TableFunc.PreviewResponse();
+                return new PreviewResponse();
             }
             finally
             {
@@ -204,10 +221,8 @@ namespace q2gconhypercubeqvx
         {
             try
             {
-                Thread.Sleep(10000);
-
                 QvDataContractResponse response;
-                var parameter = ConnectorParameter.Create(connection?.MParameters);
+                var parameter = UserParameter.Create(connection?.MParameters);
                 logger.Trace($"HandleJsonRequest {method}");
                 switch (method)
                 {
