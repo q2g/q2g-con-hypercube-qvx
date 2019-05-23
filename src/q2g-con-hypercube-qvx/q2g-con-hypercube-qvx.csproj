@@ -106,7 +106,7 @@
       <ZipFiles Include="$(OutputPath)\*.*" />
       <ZipFiles Include="$(OutputPath)\web\" />
     </ItemGroup>
-    <Exec Command="PowerShell -command Compress-Archive -force @(ZipFiles, ',') $(MSBuildProjectDirectory)\bin\$(AssemblyName).zip" />
+    <Exec Command="PowerShell -command Compress-Archive -force @(ZipFiles, ',') $(MSBuildProjectDirectory)\bin\q2g-con-hypercube-qvx.zip" />
   </Target>
 
   <Target Name="DebugCopy">
