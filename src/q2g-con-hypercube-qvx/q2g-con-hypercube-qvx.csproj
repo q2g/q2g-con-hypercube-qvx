@@ -35,7 +35,7 @@
     <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
     <PackageReference Include="NLog" Version="4.6.3" />
-    <PackageReference Include="Q2gHelperPem" Version="1.4.5" />
+    <PackageReference Include="Q2gHelperPem" Version="1.4.8" />
     <PackageReference Include="qlik-engineapi" Version="0.3.0-alpha0015" />
     <Reference Include="QvxLibrary">
       <HintPath>lib\QvxLibrary.dll</HintPath>
