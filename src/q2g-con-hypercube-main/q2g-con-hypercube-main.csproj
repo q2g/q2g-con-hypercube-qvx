@@ -14,7 +14,7 @@
     <PackageReference Include="NLog" Version="4.6.3" />
     <PackageReference Include="Q2gHelperPem" Version="1.4.5" />
     <PackageReference Include="qlik-engineapi" Version="0.3.0-alpha0015" />
-    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.6.0-preview5.19224.8" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.6.0" />
   </ItemGroup>
 
 </Project>
