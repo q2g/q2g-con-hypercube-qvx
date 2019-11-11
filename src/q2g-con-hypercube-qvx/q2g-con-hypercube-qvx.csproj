@@ -32,7 +32,7 @@
   <ItemGroup>
     <PackageReference Include="BuildWebCompiler" Version="1.12.394" PrivateAssets="all" />
     <PackageReference Include="enigma.net" Version="1.0.0" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
+    <PackageReference Include="GitVersionTask" Version="5.1.2" PrivateAssets="all" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
     <PackageReference Include="NLog" Version="4.6.3" />
     <PackageReference Include="Q2gHelperPem" Version="1.4.5" />
