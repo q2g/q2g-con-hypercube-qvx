@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="enigma.net" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NLog" Version="4.6.3" />
     <PackageReference Include="Q2gHelperPem" Version="1.4.5" />
     <PackageReference Include="qlik-engineapi" Version="0.3.0-alpha0015" />
